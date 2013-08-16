@@ -1,4 +1,4 @@
 culture-cow
 ===========
 
-Hubot configuration for Khan Academy's Culture Cow
+<a href="http://hubot.github.com/">Hubot</a> configuration for Khan Academy's Culture Cow
