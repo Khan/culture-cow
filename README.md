@@ -14,6 +14,11 @@ HipChat's veins.
 signal:noise ratio in our HipChat rooms, it will be turned into delicious
 hamburgers.
 
+Where does all the culture magic live?
+======================================
+
+Mostly in scripts/culture.js. Sorry it's JS and not CoffeeScript.
+
 Setup instructions
 ==================
 
