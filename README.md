@@ -14,10 +14,12 @@ HipChat's veins.
 signal:noise ratio in our HipChat rooms, it will be turned into delicious
 hamburgers.
 
-Where does all the culture magic live?
-======================================
+Can I add more culture magic?
+=============================
 
-Mostly in scripts/culture.js. Sorry it's JS and not CoffeeScript.
+Absolutely. Modify scripts/culture.js (or whatever else you want). Just abide
+by the two rules of Culture Cow above. And sorry it's JS and not all
+cool'n'CoffeeScripty.
 
 Setup instructions
 ==================
@@ -27,3 +29,8 @@ Setup instructions
 2) Install dependencies: ```npm install``` (or [start here](https://github.com/github/hubot/tree/master/docs) if having trouble.)
 
 3) Start the culture cow: ```bin/culturecow```
+
+Where does Khan Academy's Culture Cow live?
+===========================================
+
+toby (internal webserver)
