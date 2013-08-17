@@ -24,6 +24,6 @@ Setup instructions
 
 1) Clone repo
 
-2) Install dependencies: ```npm install```
+2) Install dependencies: ```npm install``` (or [start here](https://github.com/github/hubot/tree/master/docs) if having trouble.)
 
 3) Start the culture cow: ```bin/culturecow```
