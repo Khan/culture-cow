@@ -26,7 +26,7 @@ var culturalMsgs = [
     "<a href='http://arguingwithalgorithms.blogspot.com/2013/03/coding-for-review.html'>Write code with your reviewer in mind.</a>",
     "Recruiting is everyone's job. <a href='http://missmarcialee.com/2013/04/on-building-a-better-product-team-letter-style/'>Blogging about recruiting being everyone's job</a> is Marcia's job.",
     ],
-    morningCultureHour = 10  // hour of morning (pacific time) at which to send
+    morningCultureHour = 10; // hour of morning (pacific time) at which to send
 
 module.exports = function(robot) {
 
@@ -50,13 +50,28 @@ module.exports = function(robot) {
     };
 
     /**
+     * Send a single culture tidbit IFF it's not the weekend. Cows don't work
+     * on weekends.
+     */
+    function sendCultureMessageIfWeekday() {
+        // Ignoring timezone issues in this fxn for now, as UTC's day of week
+        // will always be the same as Pacific's when this is run ~10am.
+        // TODO(kamens): handle timezone issues.
+        var now = new Date(),
+            day = now.getUTCDay();  // 0 = Sunday, ..., 6 = Saturday
+        if (day !== 0 && day !== 6) {
+            sendCultureMessage();
+        }
+    };
+
+    /**
      * Start dripping culture tidbits now and forever, once per day.
      */
     function startCultureDrip() {       
-        // Send one culture message every day
-        setInterval(sendCultureMessage, msPerDay);
+        // Send one culture message every weekday
+        setInterval(sendCultureMessageIfWeekday, msPerDay);
         // And send one right now.
-        sendCultureMessage();
+        sendCultureMessageIfWeekday();
     }
 
     // Send one culture message whenever requested
