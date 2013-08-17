@@ -37,7 +37,10 @@ module.exports = function(robot) {
      * Send a single culture tidbit and queue up the next one.
      */
     function sendCultureMessage() {
-        var s = "(culture) " + culturalMsgs[msgIndex] + " Moooo."
+        var urlCultureCowEmoticon = "https://dujrsrsgsd3nh.cloudfront.net/img/emoticons/6574/culture-1376771657.png",
+            s = ("<img src='" + urlCultureCowEmoticon + "'> " +
+                    culturalMsgs[msgIndex] + " Moooo.");
+
         robot.messageHipchat(s);
 
         msgIndex++;
