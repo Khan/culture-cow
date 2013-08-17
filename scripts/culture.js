@@ -38,7 +38,7 @@ module.exports = function(robot) {
      */
     function sendCultureMessage() {
         var urlCultureCowEmoticon = "https://dujrsrsgsd3nh.cloudfront.net/img/emoticons/6574/culture-1376771657.png",
-            s = ("<img src='" + urlCultureCowEmoticon + "'> " +
+            s = ("<img src='" + urlCultureCowEmoticon + "'>&nbsp;" +
                     culturalMsgs[msgIndex] + " Moooo.");
 
         robot.messageHipchat(s);
