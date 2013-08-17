@@ -5,6 +5,6 @@
 #   hubot moo* - Reply w/ moo
 
 module.exports = (robot) ->
-  robot.hear /(\s|^)(m|n)o{2,100}(\s|$)/i, (msg) ->
-    msg.send "MOOOOOOOOOOOOOOOOO"
+  robot.hear /(\s|^)mo{2,100}(\s|$)/i, (msg) ->
+    robot.messageHipchat "MOOOOOOOOOOOOOOOOO"
 

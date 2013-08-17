@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# bin/secrets sets enviroment variables needed for hubot's hipchat integration.
+# It should export:
+#     export HUBOT_HIPCHAT_JID="{jabber id of hipchat user}"
+#     export HUBOT_HIPCHAT_PASSWORD="{password of hipchat user}"
+#     export HUBOT_HIPCHAT_ROOMS="{jabber id of rooms user should be in}"
+#     export HUBOT_HIPCHAT_TOKEN="{hipchat api key for sending msgs via API}"
+source bin/secrets
+
+# Run hubot
+bin/hubot --adapter hipchat
+

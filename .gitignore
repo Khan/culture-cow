@@ -7,9 +7,12 @@ lib-cov
 *.out
 *.pid
 *.gz
+*.un~
+*.swp
 
 pids
 logs
 results
+bin/secrets
 
 npm-debug.log
