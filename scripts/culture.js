@@ -37,7 +37,7 @@ module.exports = function(robot) {
      * Send a single culture tidbit and queue up the next one.
      */
     function sendCultureMessage() {
-        var s = "(cow) " + culturalMsgs[msgIndex] + " Moooo."
+        var s = "(culture) " + culturalMsgs[msgIndex] + " Moooo."
         robot.messageHipchat(s);
 
         msgIndex++;
