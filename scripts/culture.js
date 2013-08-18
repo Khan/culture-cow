@@ -85,5 +85,9 @@ function msUntilMorning() {
     later.setUTCHours(morningCultureHour + pacificUTCOffset);
     later.setUTCMinutes(0);
 
+    if (later < now) {
+        later.setUTCDate(later.getUTCDate() + 1);
+    }
+
     return Math.abs(later - now);
 }
