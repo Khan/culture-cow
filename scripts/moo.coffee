@@ -10,5 +10,5 @@ module.exports = (robot) ->
       robot.messageHipchat "MOOOOOOOOOOOOOOOOO"
     else
       if !msg.envelope.room
-        msg.send "This attempt has been logged"
+        msg.send "This incident will be reported"
 
