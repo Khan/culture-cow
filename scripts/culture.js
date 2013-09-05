@@ -26,6 +26,8 @@ var culturalMsgs = [
     "Anybody can <a href='https://sites.google.com/a/khanacademy.org/forge/for-developers/deployment-guidelines'>own a deploy</a>. If you've got big changes going out, you're probably that anybody. I (Culture Cow), may one day even keep track of a deploy count leaderboard and spit it out here!",
     "<a href='http://arguingwithalgorithms.blogspot.com/2013/03/coding-for-review.html'>Write code with your reviewer in mind.</a>",
     "Recruiting is everyone's job. <a href='http://missmarcialee.com/2013/04/on-building-a-better-product-team-letter-style/'>Blogging about recruiting being everyone's job</a> is Marcia's job.",
+    "<a href='http://www.fraustollc.com/blog/shit_code/'>\"Sure there's some bad code around, we've all seen it, hell we've all written it...If there is some smelly code out there, look for ways to make it better. Start by understanding the code, and then find ways to improve upon it.\"</a>",
+    "<a href='http://bjk5.com/post/3994859683/code-reviews-as-relationship-builders-a-few-tips'>Code reviews can make people happy.</a>",
     ],
     morningCultureHour = 10; // hour of morning (pacific time) at which to send
 
