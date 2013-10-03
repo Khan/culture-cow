@@ -28,6 +28,8 @@ var culturalMsgs = [
     "Recruiting is everyone's job. <a href='http://missmarcialee.com/2013/04/on-building-a-better-product-team-letter-style/'>Blogging about recruiting being everyone's job</a> is Marcia's job.",
     "<a href='http://www.fraustollc.com/blog/shit_code/'>\"Sure there's some bad code around, we've all seen it, hell we've all written it...If there is some smelly code out there, look for ways to make it better. Start by understanding the code, and then find ways to improve upon it.\"</a>",
     "<a href='http://bjk5.com/post/3994859683/code-reviews-as-relationship-builders-a-few-tips'>Code reviews can make people happy.</a>",
+    "@john created <a href='http://ejohn.org/blog/gittip-at-khan-academy/'>a way for all KA folks to give back to open source projects</a> that we lean on. <a href='https://docs.google.com/a/khanacademy.org/spreadsheet/ccc?key=0ApubWHv0aMirdE9LODNJY0s4WXpXSlVYLVhrNmdocWc&usp=drive_web#gid=0'>Setup your recurring donations</a>.",
+    "Nobody needs permission to take an occasional brain break by working on a FIXIT task that's been bugging you or anything else valuable that's not on your main project's critical path.",
     ],
     morningCultureHour = 10; // hour of morning (pacific time) at which to send
 
