@@ -30,6 +30,7 @@ var culturalMsgs = [
     "<a href='http://bjk5.com/post/3994859683/code-reviews-as-relationship-builders-a-few-tips'>Code reviews can make people happy.</a>",
     "@john created <a href='http://ejohn.org/blog/gittip-at-khan-academy/'>a way for all KA folks to give back to open source projects</a> that we lean on. <a href='https://docs.google.com/a/khanacademy.org/spreadsheet/ccc?key=0ApubWHv0aMirdE9LODNJY0s4WXpXSlVYLVhrNmdocWc&usp=drive_web#gid=0'>Setup your recurring donations</a>.",
     "Nobody needs permission to take an occasional brain break by working on a FIXIT task that's been bugging you or anything else valuable that's not on your main project's critical path.",
+    "Record our most amusing conversations for posterity in the <a href='https://docs.google.com/a/khanacademy.org/document/d/13bVo73p_qNTAFJKEXT-z6K_X8bAeOpzqXhopg9lDb-g/edit'>Funny Quotes file</a>!",
     ],
     morningCultureHour = 10; // hour of morning (pacific time) at which to send
 
@@ -52,7 +53,7 @@ module.exports = function(robot) {
         if (msgIndex >= culturalMsgs.length) {
             msgIndex = 0;
         }
-    };
+    }
 
     /**
      * Send a single culture tidbit IFF it's not the weekend. Cows don't work
@@ -67,7 +68,7 @@ module.exports = function(robot) {
         if (day !== 0 && day !== 6) {
             sendCultureMessage();
         }
-    };
+    }
 
     /**
      * Start dripping culture tidbits now and forever, once per day.
@@ -85,7 +86,7 @@ module.exports = function(robot) {
     });
 
     setTimeout(startCultureDrip, msUntilMorning());
-}
+};
 
 /**
  * Rand int generation, inclusive of min/max
