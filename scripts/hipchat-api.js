@@ -46,10 +46,10 @@ module.exports = function(robot) {
         // map msg.message.envelope.room to actual room without doing
         // an api lookup each time we call this function
         var rooms = {
-                "design_matters": "design matters",
-                "phoox": "Athena",
                 "1s_and_0s": "1s and 0s",
-                "mobile!": "Mobile!"
+                "exercise_internals": "Content tools",
+                "mobile!": "Mobile!",
+                "phoox": "Athena"
             },
             hipchat = {
                 format: 'json',
