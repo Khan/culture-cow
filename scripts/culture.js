@@ -31,6 +31,10 @@ var culturalMsgs = [
     "@john created <a href='http://ejohn.org/blog/gittip-at-khan-academy/'>a way for all KA folks to give back to open source projects</a> that we lean on. <a href='https://docs.google.com/a/khanacademy.org/spreadsheet/ccc?key=0ApubWHv0aMirdE9LODNJY0s4WXpXSlVYLVhrNmdocWc&usp=drive_web#gid=0'>Setup your recurring donations</a>.",
     "Nobody needs permission to take an occasional brain break by working on a FIXIT task that's been bugging you or anything else valuable that's not on your main project's critical path.",
     "Record our most amusing conversations for posterity in the <a href='https://docs.google.com/a/khanacademy.org/document/d/13bVo73p_qNTAFJKEXT-z6K_X8bAeOpzqXhopg9lDb-g/edit'>Funny Quotes file</a>!",
+    "Wanna run a usability test? DO EET. @jason's written a <a href='https://docs.google.com/a/khanacademy.org/document/d/1HdnGR6V2vuwxlXswIPAZJ0_R0aXIXn5zhPXv9FTC8NY/edit'>step-by-step guide to usability testing at KA</a>.",
+    "DRI for a significant project? Make sure it's on the big whiteboard so you can share with the rest of the team during dev sitstand updown.",
+    "Wondering what the heck people are talking about when they encourage you to plan your upcoming engineering milestones? Here're a <a href='https://docs.google.com/a/khanacademy.org/document/d/10TDINtq27bCMRTLMOCeNydyCM8U_JKlGUcZFr62luIw/edit'>few</a> <a href='https://docs.google.com/a/khanacademy.org/document/d/1yra9IgIcagbZtQ2lO8_SmdUlfYgHX0OZCKAdqFaKYEg/edit#heading=h.gojm65fhaxoq'>good</a> <a href='https://docs.google.com/a/khanacademy.org/document/d/1PEwMhzqyzUteFtmJnbSUZd2oaZAJW8y-0ODp-BN-0i4/edit'>examples</a> - and Ben's always available to talk about planning.",
+    "<a href='http://dashboards.khanacademy.org/is-ka-fast-yet'>Is Khan Academy Fast Yet?</a>"
     ],
     morningCultureHour = 10; // hour of morning (pacific time) at which to send
 
