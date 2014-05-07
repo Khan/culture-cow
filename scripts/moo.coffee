@@ -12,3 +12,9 @@ module.exports = (robot) ->
       if !msg.envelope.room
         msg.send "This incident will be reported"
 
+  robot.hear /\bdesmondo{1,}\b/i, (msg) ->
+    if msg.envelope.room == "1s_and_0s"
+      robot.messageHipchat "desmondOOOOOOOooooooo"
+    else
+      if !msg.envelope.room
+        msg.send "This incident will be reported"
