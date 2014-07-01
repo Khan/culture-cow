@@ -24,6 +24,8 @@ cool'n'CoffeeScripty.
 Setup instructions
 ==================
 
+0) Culture Cow gets installed and setup automatically by KA's aws-config/internal-webserver/setup.sh, but if you're doing this manually... 
+
 1) Clone repo
 
 2) Install dependencies: ```npm install``` (or [start here](https://github.com/github/hubot/tree/master/docs) if having trouble.)
