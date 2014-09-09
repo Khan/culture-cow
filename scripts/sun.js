@@ -3,13 +3,46 @@
 //    sun, deploy branch foo
 // etc.
 
+var http = require('http');
+
+
+var runDeployOnJenkins = function(robot, deployBranch) {
+    var options = {
+        hostname: 'jenkins.khanacademy.org',
+        port: 80,
+        path: '/job/deploy-via-multijob/buildWithParameters',
+        method: 'POST'
+    };
+
+    var req = http.request(options, function(res) {});
+
+    req.on('error', function(e) {
+        var hipchatMessage = {
+            msg: ("(sadpanda) Jenkins won't listen to me.  " + 
+                  "Go talk to it yourself."),
+            color: "red",
+            room: "1s/0s: deploys",
+            from: "Sun Wukong",
+        };
+        robot.fancyMessage(hipchatMessage);
+    });
+
+    // write data to request body
+    req.write("token=SUN_SEZ_DEPLOY&GIT_REVISION=" + deployBranch + "\n");
+    req.end();
+};
+
+
 module.exports = function(robot) {
   robot.hear(/^sun,\s+deploy\s+(?:branch\s+)?(.*)$/i, function(msg) {
       var text;
+      var deployBranch = null;
       if (msg.envelope.room === '1s0s_deploys') {
-          text = "Telling hipchat to deploy branch " + msg.match[1];
+          deployBranch = msg.match[1];
+          text = "Telling hipchat to deploy branch " + deployBranch;
       } else {
           text = "How dare you approach me outside my temple?!";
+          
       }
       var hipchatMessage = {
           msg: text,
@@ -18,6 +51,10 @@ module.exports = function(robot) {
           from: "Sun Wukong",
       };
       robot.fancyMessage(hipchatMessage);
+
+      if (deployBranch) {
+          runDeployOnJenkins(deployBranch);
+      }
   });
 
   robot.hear(/^sun,\s+ping$/i, function(msg) {
