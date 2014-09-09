@@ -50,7 +50,8 @@ module.exports = function(robot) {
                 "1s0s_deploys": "1s/0s: deploys",
                 "exercise_internals": "Content tools",
                 "mobile!": "Mobile!",
-                "phoox": "Athena"
+                "phoox": "Athena",
+                "joshtest": "HipChat Tests"
             },
             hipchat = {
                 format: 'json',
