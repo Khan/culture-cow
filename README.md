@@ -30,7 +30,17 @@ Setup instructions
 
 2) Install dependencies: ```npm install``` (or [start here](https://github.com/github/hubot/tree/master/docs) if having trouble.)
 
-3) Start the culture cow: ```bin/culturecow``` (or ```setsid bin/culturecow```
+3) Create bin/secrets as follows:
+
+   #!/bin/bash
+   export HUBOT_HIPCHAT_JID="..."
+   export HUBOT_HIPCHAT_PASSWORD="..."
+   export HUBOT_HIPCHAT_ROOMS="..."
+   export HUBOT_HIPCHAT_TOKEN="..."
+   export TRELLO_KEY="..."
+   export TRELLO_TOKEN="..."
+
+4) Start the culture cow: ```bin/culturecow``` (or ```setsid bin/culturecow```
 if you wanna kick off the culture cow on Khan Academy's toby machine and have
 it continue running after you disconnect)
 

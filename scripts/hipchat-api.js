@@ -25,7 +25,7 @@ module.exports = function(robot) {
         https.get({host: "api.hipchat.com", path: path}, function(res) {
             // TODO(kamens): handle errors'n'such
         });
-    }
+    };
 
     /**
      * robot.fancyMessage - a more versatile version of messageHipchat
@@ -47,6 +47,7 @@ module.exports = function(robot) {
         // an api lookup each time we call this function
         var rooms = {
                 "1s_and_0s": "1s and 0s",
+                "1s0s_deploys": "1s/0s deploys",
                 "exercise_internals": "Content tools",
                 "mobile!": "Mobile!",
                 "phoox": "Athena"
@@ -71,5 +72,5 @@ module.exports = function(robot) {
             }
         });
 
-    }
-}
+    };
+};
