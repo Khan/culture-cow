@@ -37,6 +37,7 @@ Setup instructions
    export HUBOT_HIPCHAT_PASSWORD="..."
    export HUBOT_HIPCHAT_ROOMS="..."
    export HUBOT_HIPCHAT_TOKEN="..."
+   export JENKINS_DEPLOY_TOKEN="<'Authentication Token' from http://jenkins.khanacademy.org/job/deploy-via-multijob/configure>"
    export TRELLO_KEY="..."
    export TRELLO_TOKEN="..."
 

@@ -6,11 +6,11 @@
 var http = require('http');
 
 
-var runDeployOnJenkins = function(robot, deployBranch) {
+var runDeployOnJenkins = function(robot, deployBranch, caller) {
     var options = {
         hostname: 'jenkins.khanacademy.org',
         port: 80,
-        path: '/job/deploy-via-multijob/buildWithParameters',
+        path: '/buildByToken/buildWithParameters',
         method: 'POST'
     };
 
@@ -18,7 +18,7 @@ var runDeployOnJenkins = function(robot, deployBranch) {
 
     req.on('error', function(e) {
         var hipchatMessage = {
-            msg: ("(sadpanda) Jenkins won't listen to me.  " + 
+            msg: ("(sadpanda) Jenkins won't listen to me.  " +
                   "Go talk to it yourself."),
             color: "red",
             room: "1s/0s: deploys",
@@ -28,7 +28,15 @@ var runDeployOnJenkins = function(robot, deployBranch) {
     });
 
     // write data to request body
-    req.write("token=SUN_SEZ_DEPLOY&GIT_REVISION=" + deployBranch + "\n");
+    req.write("job=deploy-via-multijob" +
+              "&token=" + process.env.JENKINS_DEPLOY_TOKEN +
+              "&GIT_REVISION=" + deployBranch +
+              // In theory this should be an email address but we
+              // actually only care about hipchat names for the
+              // script, so we make up a 'fake' email that yields our
+              // hipchat name.
+              "&BUILD_USER_ID_FROM_SCRIPT=" + caller + "@khanacademy.org" +
+              "&cause=Sun+Wukong\n");
     req.end();
 };
 
@@ -42,7 +50,6 @@ module.exports = function(robot) {
           text = "Telling hipchat to deploy branch " + deployBranch;
       } else {
           text = "How dare you approach me outside my temple?!";
-          
       }
       var hipchatMessage = {
           msg: text,
@@ -53,7 +60,8 @@ module.exports = function(robot) {
       robot.fancyMessage(hipchatMessage);
 
       if (deployBranch) {
-          runDeployOnJenkins(deployBranch);
+          runDeployOnJenkins(robot, deployBranch,
+                             msg.envelope.user.mention_name);
       }
   });
 
