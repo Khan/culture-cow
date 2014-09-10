@@ -16,7 +16,7 @@ var runDeployOnJenkins = function(robot, deployBranch, caller) {
                     // yields our hipchat name.
                     "&BUILD_USER_ID_FROM_SCRIPT=" +
                     caller + "@khanacademy.org" +
-                    "&cause=Sun+Wukong\n");
+                    "&cause=Sun+Wukong");
 
     var options = {
         hostname: 'jenkins.khanacademy.org',
@@ -48,6 +48,7 @@ var runDeployOnJenkins = function(robot, deployBranch, caller) {
 
     // write data to request body
     req.setHeader('Content-length', postData.length);
+    req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
     req.write(postData);
     req.end();
 };
