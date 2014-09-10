@@ -31,6 +31,7 @@ var runDeployOnJenkins = function(robot, deployBranch, caller) {
         color: "red",
         room: "1s0s_deploys",
         from: "Sun Wukong",
+        message_format: "text"
     };
 
     var req = http.request(options, function(res) {

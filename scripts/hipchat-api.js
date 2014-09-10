@@ -60,7 +60,7 @@ module.exports = function(robot) {
                 message: msg.msg,
                 from: msg.from || "Kvltvre Kow",
                 color: msg.color || "purple",  // sic, pvrpvle
-                message_format: "html"
+                message_format: msg.message_format || "html"
             },
             params = querystring.stringify(hipchat),
             path = "/v1/rooms/message/?" + params;
