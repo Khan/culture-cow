@@ -47,7 +47,7 @@ module.exports = function(robot) {
       var deployBranch = null;
       if (msg.envelope.room === '1s0s_deploys') {
           deployBranch = msg.match[1];
-          text = "Telling hipchat to deploy branch " + deployBranch;
+          text = "Telling Jenkins to deploy branch " + deployBranch;
       } else {
           text = "How dare you approach me outside my temple?!";
       }
