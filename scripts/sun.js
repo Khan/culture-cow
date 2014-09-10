@@ -29,7 +29,7 @@ var runDeployOnJenkins = function(robot, deployBranch, caller) {
         msg: ("(sadpanda) Jenkins won't listen to me.  " +
               "Go talk to it yourself."),
         color: "red",
-        room: "1s/0s: deploys",
+        room: "1s0s_deploys",
         from: "Sun Wukong",
     };
 
