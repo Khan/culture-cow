@@ -35,12 +35,14 @@ var runDeployOnJenkins = function(robot, deployBranch, caller) {
 
     var req = http.request(options, function(res) {
         if (res.statusCode !== 200) {
-            robot.fancyMessage(errorMessage);
+            // Wait a second to encourage hipchat to put the messages
+            // in the right order.
+            setTimeout(function() { robot.fancyMessage(errorMessage); }, 1000);
         }
     });
 
     req.on('error', function(e) {
-        robot.fancyMessage(errorMessage);
+        setTimeout(function() { robot.fancyMessage(errorMessage); }, 1000);
     });
 
     // write data to request body
