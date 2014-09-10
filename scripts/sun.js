@@ -7,6 +7,17 @@ var http = require('http');
 
 
 var runDeployOnJenkins = function(robot, deployBranch, caller) {
+    var postData = ("job=deploy-via-multijob" +
+                    "&token=" + process.env.JENKINS_DEPLOY_TOKEN +
+                    "&GIT_REVISION=" + deployBranch +
+                    // In theory this should be an email address but
+                    // we actually only care about hipchat names for
+                    // the script, so we make up a 'fake' email that
+                    // yields our hipchat name.
+                    "&BUILD_USER_ID_FROM_SCRIPT=" +
+                    caller + "@khanacademy.org" +
+                    "&cause=Sun+Wukong\n");
+
     var options = {
         hostname: 'jenkins.khanacademy.org',
         port: 80,
@@ -14,29 +25,27 @@ var runDeployOnJenkins = function(robot, deployBranch, caller) {
         method: 'POST'
     };
 
-    var req = http.request(options, function(res) {});
+    var errorMessage = {
+        msg: ("(sadpanda) Jenkins won't listen to me.  " +
+              "Go talk to it yourself."),
+        color: "red",
+        room: "1s/0s: deploys",
+        from: "Sun Wukong",
+    };
+
+    var req = http.request(options, function(res) {
+        if (res.statusCode !== 200) {
+            robot.fancyMessage(errorMessage);
+        }
+    });
 
     req.on('error', function(e) {
-        var hipchatMessage = {
-            msg: ("(sadpanda) Jenkins won't listen to me.  " +
-                  "Go talk to it yourself."),
-            color: "red",
-            room: "1s/0s: deploys",
-            from: "Sun Wukong",
-        };
-        robot.fancyMessage(hipchatMessage);
+        robot.fancyMessage(errorMessage);
     });
 
     // write data to request body
-    req.write("job=deploy-via-multijob" +
-              "&token=" + process.env.JENKINS_DEPLOY_TOKEN +
-              "&GIT_REVISION=" + deployBranch +
-              // In theory this should be an email address but we
-              // actually only care about hipchat names for the
-              // script, so we make up a 'fake' email that yields our
-              // hipchat name.
-              "&BUILD_USER_ID_FROM_SCRIPT=" + caller + "@khanacademy.org" +
-              "&cause=Sun+Wukong\n");
+    req.setHeader('Content-length', postData.length);
+    req.write(postData);
     req.end();
 };
 
