@@ -184,6 +184,15 @@ var handleAbort = function(robot, msg) {
                  "Telling Jenkins to abort this deploy.");
 };
 
+var handleFinish = function(robot, msg) {
+    if (!gNextPipelineCommands.abort) {
+        wrongPipelineStep(robot, msg, 'finish');
+        return;
+    }
+    runOnJenkins(robot, msg, gNextPipelineCommands.finish,
+                 "Telling Jenkins to finish this deploy!");
+};
+
 var _appendJobname = function(jobname, otherPostParams) {
     return otherPostParams + '&job=' + querystring.escape(jobname);
 };
@@ -213,13 +222,13 @@ var handleDeployDone = function(robot, msg) {
 
 
 // fn takes a robot object and a hubot message object.
-var hearInDeployRoom = function(robot, room, regexp, fn) {
+var hearInDeployRoom = function(robot, regexp, fn) {
     robot.hear(regexp, function(msg) {
         if (msg.envelope.room !== "1s0s_deploys") {
             wrongRoom(robot, msg);
             return;
         }
-        fn(msg);
+        fn(robot, msg);
     });
 };
 
