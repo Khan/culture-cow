@@ -199,19 +199,19 @@ var _appendJobname = function(jobname, otherPostParams) {
 
 var handleAfterDeploy = function(robot, msg) {
     setNextPipelineCommands(
-        {"setDefault": _appendJobname(msg.match(1), msg.match(2)),
-         "abort": _appendJobname(msg.match(3), msg.match(4))
+        {"setDefault": _appendJobname(msg.match[1], msg.match[2]),
+         "abort": _appendJobname(msg.match[3], msg.match[4])
         });
 };
 
 var handleAfterSetDefault = function(robot, msg) {
-    setNextPipelineCommands({"cancel": msg.match(1)});
+    setNextPipelineCommands({"cancel": msg.match[1]});
 };
 
 var handleAfterMonitoring = function(robot, msg) {
     setNextPipelineCommands(
-        {"finish": _appendJobname(msg.match(1), msg.match(2)),
-         "abort": _appendJobname(msg.match(3), msg.match(4))
+        {"finish": _appendJobname(msg.match[1], msg.match[2]),
+         "abort": _appendJobname(msg.match[3], msg.match[4])
         });
 };
 
