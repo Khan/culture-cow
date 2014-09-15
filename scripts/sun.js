@@ -127,9 +127,15 @@ var handlePing = function(robot, msg) {
 };
 
 var handleDeploy = function(robot, msg) {
-    // TODO(csilvers): allow the user to override this test.
-    if (!gNextPipelineCommands.deploy) {
-        wrongPipelineStep(robot, msg, 'deploy');
+    if (!gNextPipelineCommands.deploy && !msg.match[2]) {
+        robot.fancyMessage({
+            msg: ("I think there's a deploy already going on.  If that's " +
+                  "not the case, or you want to start a deploy anyway, say " +
+                  "'sun, deploy " + msg.match[1] + ", dagnabit'."),
+            color: "red",
+            room: msg.envelope.room,
+            from: "Sun Wukong",
+        });
         return;
     }
 
@@ -237,7 +243,7 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /^sun,\s+ping$/i, handlePing);
 
     // These are the user-typed commands we listen for.
-    hearInDeployRoom(robot, /^sun,\s+deploy\s+(?:branch\s+)?([^,]*)$/i, handleDeploy);
+    hearInDeployRoom(robot, /^sun,\s+deploy\s+(?:branch\s+)?([^,]*)(, dagnabit)?$/i, handleDeploy);
     hearInDeployRoom(robot, /^sun,\s+set.default$/i, handleSetDefault);
     hearInDeployRoom(robot, /^sun,\s+abort.*$/i, handleAbort);
     hearInDeployRoom(robot, /^sun,\s+finish.*$/i, handleFinish);
