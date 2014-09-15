@@ -23,7 +23,14 @@ module.exports = function(robot) {
             path = "/v1/rooms/message/?" + params;
 
         https.get({host: "api.hipchat.com", path: path}, function(res) {
-            // TODO(kamens): handle errors'n'such
+            console.error('ERROR TALKING TO HIPCHAT:');
+            console.error('   Sent: ' + path);
+            console.error('   Status: ' + res.statusCode);
+            console.error('   Headers: ' + JSON.stringify(res.headers));
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                console.error('   Body: ' + chunk);
+            });
         });
     };
 
@@ -67,9 +74,15 @@ module.exports = function(robot) {
 
         https.get({host: "api.hipchat.com", path: path}, function(res) {
             if (res.statusCode !== 200) {
+                console.error('ERROR TALKING TO HIPCHAT:');
+                console.error('   Sent: ', hipchat);
                 // see also https://www.hipchat.com/docs/api/response_codes
-                console.log("hipchat api status: ", res.statusCode);
-                console.log("tried sending", hipchat);
+                console.error('   Status: ' + res.statusCode);
+                console.error('   Headers: ' + JSON.stringify(res.headers));
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    console.error('   Body: ' + chunk);
+                });
             }
         });
 
