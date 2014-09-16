@@ -249,8 +249,8 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /^sun,\s+finish.*$/i, handleFinish);
 
     // These are the Jenkins-emitted hipchat messages we listen for.
-    hearInDeployRoom(robot, /\(successful\) set it as default: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort the deploy: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)"/, handleAfterDeploy);
+    hearInDeployRoom(robot, /\(successful\) set it as default: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort the deploy: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterDeploy);
     hearInDeployRoom(robot, /\(failed\) abort and rollback: http:\/\/jenkins.khanacademy.org(.*\/stop)$/, handleAfterSetDefault);
-    hearInDeployRoom(robot, /\(successful\) finish up: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort and roll back: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)"/, handleAfterMonitoring);
+    hearInDeployRoom(robot, /\(successful\) finish up: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort and roll back: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterMonitoring);
     hearInDeployRoom(robot, /Deploy of .* (failed[:.]|succeeded!)/, handleDeployDone);
 };
