@@ -214,7 +214,7 @@ var handleRollback = function(robot, msg) {
 };
 
 var handleEmergencyRollback = function(robot, msg) {
-    var jobname = '++ EMERGENCY ROLLBACK ++';
+    var jobname = '-- EMERGENCY ROLLBACK --';
     runOnJenkins(robot, msg, 'job=' + querystring.escape(jobname),
                  "Telling Jenkins to roll back the live site to a safe " +
                  "version");
