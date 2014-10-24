@@ -91,6 +91,9 @@ var runOnJenkins = function(robot, msg, postData, hipchatMessage) {
         path: '/buildByToken/buildWithParameters',
         method: 'POST'
     };
+    if (postData.indexOf('&') === -1) {       // no parameters except job=...
+        options.path = '/buildByToken/build';
+    }
 
     // Add some invariants to the post data.  (JENKINS_DEPLOY_TOKEN is
     // under our control and we know it's url-escape safe.)
