@@ -199,6 +199,25 @@ var handleFinish = function(robot, msg) {
                  "Telling Jenkins to finish this deploy!");
 };
 
+var handleRollback = function(robot, msg) {
+    robot.fancyMessage({
+        msg: ("If you want to roll back the production servers because " +
+              "you noticed some problems with them after their deploy " +
+              "was finished, say <b>sun, emergency rollback</b>."),
+        color: "red",
+        room: msg.envelope.room,
+        from: "Sun Wukong",
+    });
+};
+
+var handleEmergencyRollback = function(robot, msg) {
+    var jobname = '++ EMERGENCY ROLLBACK ++';
+    runOnJenkins(robot, msg, 'job=' + querystring.escape(jobname),
+                 "Telling Jenkins to roll back the live site to a safe " +
+                 "version");
+};
+
+
 var _appendJobname = function(jobname, otherPostParams) {
     return otherPostParams + '&job=' + querystring.escape(jobname);
 };
@@ -247,6 +266,11 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /^sun,\s+set.default$/i, handleSetDefault);
     hearInDeployRoom(robot, /^sun,\s+abort.*$/i, handleAbort);
     hearInDeployRoom(robot, /^sun,\s+finish.*$/i, handleFinish);
+    // Does an emergency rollback, outside the deploy process
+    hearInDeployRoom(robot, /^sun,\s+rollback.*$/i,
+                     handleRollback);
+    hearInDeployRoom(robot, /^sun,\s+emergency rollback.*$/i,
+                     handleEmergencyRollback);
 
     // These are the Jenkins-emitted hipchat messages we listen for.
     hearInDeployRoom(robot, /\(successful\) set it as default: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort the deploy: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterDeploy);
