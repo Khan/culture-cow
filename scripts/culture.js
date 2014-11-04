@@ -47,7 +47,8 @@ var culturalMsgs = [
     "Wanna run a usability test? DO EET. @jason's written a <a href='https://docs.google.com/a/khanacademy.org/document/d/1HdnGR6V2vuwxlXswIPAZJ0_R0aXIXn5zhPXv9FTC8NY/edit'>step-by-step guide to usability testing at KA</a>.",
     "DRI for a significant project? Make sure it's on the big whiteboard so you can share with the rest of the team during dev sitstand updown.",
     "Wondering what the heck people are talking about when they encourage you to plan your upcoming engineering milestones? Here're a <a href='https://docs.google.com/a/khanacademy.org/document/d/10TDINtq27bCMRTLMOCeNydyCM8U_JKlGUcZFr62luIw/edit'>few</a> <a href='https://docs.google.com/a/khanacademy.org/document/d/1yra9IgIcagbZtQ2lO8_SmdUlfYgHX0OZCKAdqFaKYEg/edit#heading=h.gojm65fhaxoq'>good</a> <a href='https://docs.google.com/a/khanacademy.org/document/d/1PEwMhzqyzUteFtmJnbSUZd2oaZAJW8y-0ODp-BN-0i4/edit'>examples</a> - and Ben's always available to talk about planning.",
-    "<a href='http://dashboards.khanacademy.org/is-ka-fast-yet'>Is Khan Academy Fast Yet?</a>"
+    "<a href='http://dashboards.khanacademy.org/is-ka-fast-yet'>Is Khan Academy Fast Yet?</a>",
+    "Are you stuck in <a href='https://twitter.com/kamens/status/529443780273786881'>google account limbo?!</a> Try adding <code>?authuser=1</code> to that drive url you tried to access with your personal gmail account"
     ],
     morningCultureHour = 10; // hour of morning (pacific time) at which to send
 
