@@ -8,36 +8,48 @@
 #   None
 #
 # Commands:
-#   hubot xkcd [latest]- The latest XKCD comic
-#   hubot xkcd <num> - XKCD comic <num>
-#   hubot xkcd random - XKCD comic <num>
+#   xkcd [latest]- The latest XKCD comic
+#   xkcd <num> - XKCD comic <num>
+#   xkcd random - XKCD comic <num>
 #
 # Author:
 #   twe4ked
 #   Hemanth (fixed the max issue)
 
+send = (msg, text) ->
+    msg.robot.fancyMessage({
+        msg: text,
+        room: msg.envelope.room,
+        from: "Comic Colobus",
+        message_format: "html"
+    }); 
+
+sendXkcd = (msg, object) ->
+    text = object.title + "<br/><a href='"+ object.img + "'><img src='" + object.img + "'/></a><br/>" + object.alt
+    send msg, text
+
 module.exports = (robot) ->
-  robot.respond /xkcd(\s+latest)?$/i, (msg) ->
+  robot.hear /^xkcd(\s+latest)?$/i, (msg) ->
     msg.http("http://xkcd.com/info.0.json")
       .get() (err, res, body) ->
         if res.statusCode == 404
-          msg.send 'Comic not found.'
+          send msg, 'Comic not found.'
         else
           object = JSON.parse(body)
-          msg.send object.title, object.img, object.alt
+          sendXkcd msg, object
 
-  robot.respond /xkcd\s+(\d+)/i, (msg) ->
+  robot.hear /^xkcd\s+(\d+)$/i, (msg) ->
     num = "#{msg.match[1]}"
 
     msg.http("http://xkcd.com/#{num}/info.0.json")
       .get() (err, res, body) ->
         if res.statusCode == 404
-          msg.send 'Comic #{num} not found.'
+          send msg, 'Comic #{num} not found.'
         else
           object = JSON.parse(body)
-          msg.send object.title, object.img, object.alt
+          sendXkcd msg, object
 
-  robot.respond /xkcd\s+random/i, (msg) ->
+  robot.hear /^xkcd\s+random$/i, (msg) ->
     msg.http("http://xkcd.com/info.0.json")
           .get() (err,res,body) ->
             if res.statusCode == 404
@@ -48,4 +60,4 @@ module.exports = (robot) ->
                msg.http("http://xkcd.com/#{num}/info.0.json")
                .get() (err, res, body) ->
                  object = JSON.parse(body)
-                 msg.send object.title, object.img, object.alt
+                 sendXkcd msg, object

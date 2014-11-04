@@ -14,5 +14,6 @@ pids
 logs
 results
 bin/secrets
+data
 
 npm-debug.log

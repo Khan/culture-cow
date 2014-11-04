@@ -1,9 +1,24 @@
-// The hubot for Sun Wukong, the monkey king.
-//
-// Sun is responsible for listening to deploy commands:
-//    sun, deploy branch foo
-//    sun, set default
-// etc.
+/**
+ * Description:
+ *   Get a list of all installed script commands
+ *
+ * Dependencies:
+ *   None
+ *
+ * Configuration:
+ *   None
+ *
+ * Commands:
+ *   sun, deploy <branch foo> - deploy a particular branch to production
+ *   sun, set default - after a deploy succeeds, sets the deploy as default
+ *   sun, abort - abort a deploy (at any point during the process)
+ *   sun, finish - do the last step in deploy, to merge with master and let the next person deploy
+ *   sun, rollback - get a note to use "sun, emergency rollback" instead
+ *   sun, emergency rollback - does an emergency rollback outside of deploy process
+ *
+ * Author:
+ *   csilvers
+ */
 
 var http = require('http'),
     querystring = require("querystring");

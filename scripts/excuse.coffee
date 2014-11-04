@@ -8,11 +8,9 @@
 #   None
 #
 # Commands:
-#   hubot developer excuse me - Get a random developer excuse
-#   hubot developer excuse - Get a random developer excuse
-#
-#   hubot designer excuse me - Get a random designer excuse
-#   hubot designer excuse - Get a random designer excuse
+#   developer excuse - Get a random developer excuse
+#   excuse - Get a random developer excuse
+#   designer excuse - Get a random designer excuse
 #
 # Author:
 #   ianmurrays, hopkinschris
@@ -48,13 +46,26 @@ DESIGNER_EXCUSES = [
 ]
 
 module.exports = (robot) ->
-  robot.respond /developer excuse|excuse(?: me)?/i, (msg) ->
-    robot.http("http://developerexcuses.com")
-      .get() (err, res, body) ->
-        matches = body.match /<a [^>]+>(.+)<\/a>/i
+  robot.hear /^(?:developer excuse|excuse)(?: me)?$/i, (msg) ->
+    if robot.fromSelf msg
+        return
+    if msg.envelope.user.jid isnt process.env.HUBOT_HIPCHAT_JID
+        robot.http("http://developerexcuses.com")
+          .get() (err, res, body) ->
+            matches = body.match /<a [^>]+>(.+)<\/a>/i
 
-        if matches and matches[1]
-          msg.send matches[1]
+            if matches and matches[1]
+              robot.fancyMessage({
+                msg: matches[1],
+                room: msg.envelope.room,
+                from: "Excuse Emu",
+              });
 
-  robot.respond /designer excuse|excuse(?: me)?/i, (msg) ->
-    msg.send msg.random(DESIGNER_EXCUSES)
+  robot.hear /^designer excuse(?: me)?$/i, (msg) ->
+    if msg.envelope.user.jid isnt process.env.HUBOT_HIPCHAT_JID
+        robot.fancyMessage({
+            msg: msg.random(DESIGNER_EXCUSES),
+            room: msg.envelope.room,
+            from: "Excuse Emu",
+        });
+

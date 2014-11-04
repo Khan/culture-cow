@@ -8,7 +8,7 @@
 #   None
 #
 # Commands:
-#   hubot aww - Display the picture from /r/aww
+#   aww - Display the picture from /r/aww
 #
 # Author:
 #   eliperkins
@@ -16,7 +16,9 @@
 url = require("url")
 
 module.exports = (robot) ->
-  robot.respond /aww/i, (msg) ->
+  robot.hear /^aww+$/i, (msg) ->
+    if robot.fromSelf msg
+        return
     search = escape(msg.match[1])
     msg.http('http://www.reddit.com/r/aww.json')
       .get() (err, res, body) ->
@@ -41,4 +43,9 @@ module.exports = (robot) ->
 
           picked_url = url.format(parsed_url)
 
-        msg.send picked_url
+        text = "<img src='" + picked_url + "'>"
+        robot.fancyMessage({
+            msg: text,
+            room: msg.envelope.room,
+            from: "Aww Ape",
+        });

@@ -37,9 +37,17 @@ Setup instructions
    export HUBOT_HIPCHAT_PASSWORD="..."
    export HUBOT_HIPCHAT_ROOMS="..."
    export HUBOT_HIPCHAT_TOKEN="..."
+
+   export FILE_BRAIN_PATH="..."
    export JENKINS_DEPLOY_TOKEN="<'Authentication Token' from http://jenkins.khanacademy.org/job/deploy-via-multijob/configure>"
    export TRELLO_KEY="..."
    export TRELLO_TOKEN="..."
+
+   export HUBOT_ZENDESK_USER="..."
+   export HUBOT_ZENDESK_PASSWORD="..."
+   export HUBOT_ZENDESK_SUBDOMAIN="..."
+
+   export HUBOT_WOLFRAM_APPID="..."
 
 4) Start the culture cow: ```bin/culturecow``` (or ```setsid bin/culturecow```
 if you wanna kick off the culture cow on Khan Academy's toby machine and have

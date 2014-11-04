@@ -2,6 +2,13 @@ var https = require("https"),
     querystring = require("querystring");
 
 module.exports = function(robot) {
+
+    robot.fromSelf = function(msg) {
+        //For human users the user.id is numeric, when we send via
+        //fancyMessage this is true.
+        return msg.envelope.user.id === msg.envelope.user.name;
+    };
+
     // Attach a new message utility to robot, much like messageRoom, except
     // targetted at hipchat over the hipchat API. The hipchat API gives us more
     // flexibility than jabber when it comes to message formatting/coloring.
@@ -58,7 +65,8 @@ module.exports = function(robot) {
                 "exercise_internals": "Content tools",
                 "mobile!": "Mobile!",
                 "phoox": "Athena",
-                "joshtest": "HipChat Tests"
+                "joshtest": "HipChat Tests",
+                "jamestest": "jamestest"
             },
             hipchat = {
                 format: 'json',

@@ -1,8 +1,21 @@
 /**
- * A steady drip of Khan Academy culture, straight into HipChat's veins.
+ * Description:
+ *   A steady drip of Khan Academy culture, straight into HipChat's veins.
  *
- * "@CultureCow culture us" to get your hit of culture on demand.
+ * Dependencies:
+ *   None
+ *
+ * Configuration:
+ *   None
+ *
+ * Commands:
+ *   @CultureCow culture us - get your hit of culture on demand
+ *
+ * Author:
+ *   kamens
  */
+
+
 
 var culturalMsgs = [
     "<a href='https://sites.google.com/a/khanacademy.org/forge/for-developers'>Shipping beats perfection</a>.",
@@ -77,7 +90,7 @@ module.exports = function(robot) {
     /**
      * Start dripping culture tidbits now and forever, once per day.
      */
-    function startCultureDrip() {       
+    function startCultureDrip() {
         // Send one culture message every weekday
         setInterval(sendCultureMessageIfWeekday, msPerDay);
         // And send one right now.

@@ -1,29 +1,57 @@
 # Description:
-#   Allows hubot to answer almost any question by asking Wolfram Alpha
+#   Allows hubot to answer almost any question by asking wolfram Alpha
 #
 # Dependencies:
-#   "wolfram": "0.2.2"
+#   "wolfram-node": "0.2.2"
 #
 # Configuration:
 #   HUBOT_WOLFRAM_APPID - your AppID
 #
 # Commands:
-#   hubot question <question> - Searches Wolfram Alpha for the answer to the question
+#   wolfram|wfa <question> - Searches wolfram Alpha for the answer to the question
 #
 # Notes:
 #   This may not work with node 0.6.x
 #
 # Author:
 #   dhorrigan
+wolfram = require('wolfram-node').init(process.env.HUBOT_WOLFRAM_APPID)
 
-Wolfram = require('wolfram').createClient(process.env.HUBOT_WOLFRAM_APPID)
+send = (msg, text) ->
+    msg.robot.fancyMessage({
+        msg: text,
+        room: msg.envelope.room,
+        from: "Wolfy wolfram",
+        message_format: "html"
+    }); 
 
 module.exports = (robot) ->
-  robot.respond /(question|wfa) (.*)$/i, (msg) ->
-    console.log msg.match
-    Wolfram.query msg.match[2], (e, result) ->
-      # console.log result
-      if result and result.length > 0
-        msg.send result[1]['subpods'][0]['value']
-      else
-        msg.send 'Hmm...not sure'
+  robot.hear /^(wolfram|wfa) (.*)$/i, (msg) ->
+    data = {
+        query : msg.match[2],
+    };
+    triesLeft = 3
+    ask = (data) ->
+         wolfram.ask data, (e, result) ->
+            if e or result['error']
+                error = e or result['error']
+                console.log("wolfram error" + e)
+                triesLeft -= 1
+                if triesLeft
+                    console.log("trying wolfram call again")
+                    ask data
+                else
+                    send msg, "wolfram is down"
+                return
+            else if result and result['pod'] and result['pod'].length
+                src = result['pod'][0]['subpod'][0]['img'][0]['$']['src']
+                text = "<a href='" + src + "'><img src='" + src + "'/></a><br/>"
+
+                src = result['pod'][1]['subpod'][0]['img'][0]['$']['src']
+                text += "<a href='" + src + "'><img src='" + src + "'/></a>"
+
+                send msg, text
+            else 
+                send msg, 'Hmm...not sure'
+
+    ask data

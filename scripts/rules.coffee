@@ -4,6 +4,9 @@
 # Commands:
 #   hubot the rules - Make sure hubot still knows the rules.
 #
+# Author: 
+#   kamens
+#
 # Notes:
 #   DON'T DELETE THIS SCRIPT! ALL ROBAWTS MUST KNOW THE RULES
 

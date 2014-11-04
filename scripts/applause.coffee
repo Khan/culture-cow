@@ -8,8 +8,8 @@
 #   None
 #
 # Commands:
-#   applause|applaud|bravo|slow clap - Get applause
-#   sarcastic applause|clap - Get sarcastic applause
+#   applause|applaud|bravo clap - Get applause
+#   sarcastic|slow applause|clap - Get sarcastic applause
 #
 # Author:
 #   joshfrench
@@ -63,6 +63,12 @@ images =
   ]
 
 module.exports = (robot) ->
-  robot.hear /applau(d|se)|bravo|sarcastic applause|(slow|sarcastic) clap/i, (msg) ->
-    type = if (/sarcastic/i).test(msg.message.text) then images.insincere else images.sincere
-    msg.send msg.random type
+  robot.hear /^applau(d|se)|bravo|sarcastic applause|(slow|sarcastic) clap$/i, (msg) ->
+    if not robot.fromSelf msg
+        type = if (/sarcastic|slow/i).test(msg.message.text) then images.insincere else images.sincere
+        text = "<img src='" + msg.random(type) + "'>"
+        robot.fancyMessage({
+            msg: text,
+            room: msg.envelope.room,
+            from: "Applause Ape",
+        });

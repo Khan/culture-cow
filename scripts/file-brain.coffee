@@ -17,7 +17,7 @@ fs   = require 'fs'
 path = require 'path'
 
 module.exports = (robot) ->
-  brainPath = process.env.FILE_BRAIN_PATH or '/var/hubot'
+  brainPath = 'data'
   brainPath = path.join brainPath, 'brain-dump.json'
 
   try
