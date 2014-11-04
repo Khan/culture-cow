@@ -46,7 +46,7 @@ module.exports = (robot) ->
             robot.fancyMessage({
                msg: commands,
                room: msg.envelope.room,
-               from: "Excuse Emu",
+               from: "Command Colobus",
                message_format: "text"
             });
 

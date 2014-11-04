@@ -63,6 +63,7 @@ module.exports = function(robot) {
                 "1s_and_0s": "1s and 0s",
                 "1s0s_deploys": "1s/0s: deploys",
                 "exercise_internals": "Content tools",
+                "internet_lint_filter": "Internet lint filter",
                 "mobile!": "Mobile!",
                 "phoox": "Athena",
                 "joshtest": "HipChat Tests",
