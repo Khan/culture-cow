@@ -25,7 +25,6 @@ award_points = (msg, username, pts) ->
     send msg, pts + ' points Awarded To ' + username
 
 save = (robot) ->
-    robot.brain.data.points = points
     robot.brain.save()
 
 send = (msg, text) ->
