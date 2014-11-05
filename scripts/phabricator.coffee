@@ -15,11 +15,13 @@
 #   tzjames
 
 module.exports = (robot) ->
-  robot.hear /\b((D|T)\d+)\b/i, (msg) ->
+  # We check for whitespace rather than a word boundary beforehand to make sure 
+  # we don't match links, as / is considered a word boundary.
+  robot.hear /(^|\s)((D|T)\d+)\b/i, (msg) ->
     if robot.fromSelf msg
         return
     robot.fancyMessage({
-        msg: "http://phabricator.khanacademy.org/" + msg.match[1],
+        msg: "http://phabricator.khanacademy.org/" + msg.match[2],
         room: msg.envelope.room,
         from: "Phabot Rabbit",
         message_format: "text"
