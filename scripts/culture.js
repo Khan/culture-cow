@@ -60,12 +60,19 @@ module.exports = function(robot) {
     /**
      * Send a single culture tidbit and queue up the next one.
      */
-    function sendCultureMessage() {
+    function sendCultureMessage(msg) {
         var urlCultureCowEmoticon = "https://dujrsrsgsd3nh.cloudfront.net/img/emoticons/6574/culture-1376771657.png",
             s = ("<img src='" + urlCultureCowEmoticon + "'>&nbsp;" +
                     culturalMsgs[msgIndex] + " Moooo.");
 
-        robot.messageHipchat(s);
+        var genesisDevice = {
+            "msg": s,
+            // the default for 'room' in fancyMessage is 1s & 0s
+            "room": msg ? msg.envelope.room : null,
+            "color": "purple",
+            "from": "Culture Cow",
+        };
+        robot.fancyMessage(genesisDevice);
 
         msgIndex++;
         if (msgIndex >= culturalMsgs.length) {
@@ -100,7 +107,7 @@ module.exports = function(robot) {
 
     // Send one culture message whenever requested
     robot.respond(/culture us$/i, function(msg) {
-        sendCultureMessage();
+        sendCultureMessage(msg);
     });
 
     setTimeout(startCultureDrip, msUntilMorning());
