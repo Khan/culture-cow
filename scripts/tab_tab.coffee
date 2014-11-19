@@ -19,7 +19,7 @@ path = require 'path'
 endswith = (file, suffix) -> file.indexOf(suffix, file.length - suffix.length) isnt -1
 
 module.exports = (robot) ->
-	robot.hear /^tab tab|tt$/i, (msg) ->
+	robot.hear /^(tab tab|tt)$/i, (msg) ->
         if not robot.fromSelf msg
             scriptPath = path.join(".", "scripts")
 
