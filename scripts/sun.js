@@ -219,9 +219,10 @@ var handleFinish = function(robot, msg) {
 
 var handleRollback = function(robot, msg) {
     robot.fancyMessage({
-        msg: ("If you want to roll back the production servers because " +
-              "you noticed some problems with them after their deploy " +
-              "was finished, say <b>sun, emergency rollback</b>."),
+        msg: ("Are you currently doing a deploy?  Say <b>sun, abort</b> " +
+              "instead.  Do you want to roll back the production servers " +
+              "because you noticed some problems with them after their " +
+              "deploy was finished?  Say <b>sun, emergency rollback</b>."),
         color: "red",
         room: msg.envelope.room,
         from: "Sun Wukong",
