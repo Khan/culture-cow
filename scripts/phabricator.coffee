@@ -21,7 +21,7 @@ module.exports = (robot) ->
     if robot.fromSelf msg
         return
     robot.fancyMessage({
-        msg: "http://phabricator.khanacademy.org/" + msg.match[2],
+        msg: "https://phabricator.khanacademy.org/" + msg.match[2],
         room: msg.envelope.room,
         from: "Phabot Rabbit",
         message_format: "text"
