@@ -17,7 +17,7 @@ fs   = require 'fs'
 path = require 'path'
 
 module.exports = (robot) ->
-  brainPath = 'data'
+  brainPath = '/home/ubuntu/culture-cow'
   brainPath = path.join brainPath, 'brain-dump.json'
 
   try
