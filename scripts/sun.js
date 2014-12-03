@@ -241,6 +241,10 @@ var _appendJobname = function(jobname, otherPostParams) {
     return otherPostParams + '&job=' + querystring.escape(jobname);
 };
 
+var handleAfterStart = function(robot, msg) {
+    setNextPipelineCommands({"cancel": msg.match[1]});
+};
+
 var handleAfterDeploy = function(robot, msg) {
     setNextPipelineCommands(
         {"setDefault": _appendJobname(msg.match[1], msg.match[2]),
@@ -286,12 +290,12 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /^sun,\s+abort.*$/i, handleAbort);
     hearInDeployRoom(robot, /^sun,\s+finish.*$/i, handleFinish);
     // Does an emergency rollback, outside the deploy process
-    hearInDeployRoom(robot, /^sun,\s+rollback.*$/i,
-                     handleRollback);
+    hearInDeployRoom(robot, /^sun,\s+rollback.*$/i, handleRollback);
     hearInDeployRoom(robot, /^sun,\s+emergency rollback.*$/i,
                      handleEmergencyRollback);
 
     // These are the Jenkins-emitted hipchat messages we listen for.
+    hearInDeployRoom(robot, /\(failed\) abort: http:\/\/jenkins.khanacademy.org(.*\/stop)$/, handleAfterStart);
     hearInDeployRoom(robot, /\(successful\) set it as default: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort the deploy: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterDeploy);
     hearInDeployRoom(robot, /\(failed\) abort and rollback: http:\/\/jenkins.khanacademy.org(.*\/stop)$/, handleAfterSetDefault);
     hearInDeployRoom(robot, /\(successful\) finish up: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort and roll back: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterMonitoring);
