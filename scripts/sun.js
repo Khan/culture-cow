@@ -300,4 +300,5 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /\(failed\) abort and rollback: http:\/\/jenkins.khanacademy.org(.*\/stop)$/, handleAfterSetDefault);
     hearInDeployRoom(robot, /\(successful\) finish up: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort and roll back: http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterMonitoring);
     hearInDeployRoom(robot, /Deploy of .* (failed[:.]|succeeded!)/, handleDeployDone);
+    hearInDeployRoom(robot, /has manually released the deploy lock/, handleDeployDone);
 };
