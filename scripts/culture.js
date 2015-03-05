@@ -30,7 +30,7 @@ var culturalMsgs = [
     "Keep learning — <a href='https://sites.google.com/a/khanacademy.org/forge/for-khan-employees/conferences'>we'll send you to conferences to do so</a>.",
     "Anybody can fix anything. (And anybody can run a <a href='https://gist.github.com/spicyj/8df622f1d18b4cc8f71b'>FIXIT</a> for themselves or their team.)",
     "Wading into some old code that's really disgusting compared to your brilliant new feature? You don't have to fix everything all at once. \"Leave it better\" and use # TODOs liberally. (Ben says he's sorry for the old code.)",
-    "Wanna teach the team about anything? Spread good habits? Show off what you're building? Sign up for an Exalted Speaker slot during next Wednesday's dev sitdown.",
+    "Wanna teach the team about anything? Spread good habits? Show off what you're building? <a href='http://khanacademy.org/r/speaknow'>Sign up to Speak Now</a> in the future after Wednesday's dev sitdown!",
     "Will just leave these <a href='https://www.khanacademy.org/stories'>users stories here</a>.",
     "Do you need anything to do your job well? Hardware? Software? Food? Coach K bobblehead for your desk? <a href='https://sites.google.com/a/khanacademy.org/forge/for-khan-employees/how-to-buy-software-hardware-anything-you-need-to-get-your-job-done-well'>It's easy to get whatever you need</a>, and if you have any trouble ping Kamens quickly.",
     "Shipping anything sizable? <a href='http://www.joelonsoftware.com/articles/fog0000000012.html'>Dog food</a> it! Schedule a dogfooding hour, ping in hipchat to gather friendly eaters of dog food, profit.",
