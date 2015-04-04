@@ -49,11 +49,11 @@ Setup instructions
 
     export HUBOT_WOLFRAM_APPID="..."
 
-4) Start the culture cow: ```bin/culturecow``` (or ```setsid bin/culturecow```
-if you wanna kick off the culture cow on Khan Academy's toby machine and have
-it continue running after you disconnect)
+    export HUBOT_ASANA_APIKEY="<from https://phabricator.khanacademy.org/K61>"
+
+4) Start the culture cow: ```sudo service culture-cow restart```
 
 Where does Khan Academy's Culture Cow live?
 ===========================================
 
-toby (internal webserver)
+toby

@@ -1,6 +1,6 @@
 /**
  * Description:
- *   Get a list of all installed script commands
+ *   Send prod-deploy commands to jenkins.
  *
  * Dependencies:
  *   None
