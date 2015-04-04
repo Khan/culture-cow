@@ -145,7 +145,7 @@ var postTask = function(robot, msg, taskTitle, asanaEmail) {
 
 module.exports = function(robot) {
     // TODO(csilvers): allow setting tags and such using msg.match[1]
-    robot.hear(/sherpa([^:]*): *(.*)/i, function(msg) {
+    robot.hear(/^sherpa([^:]*): *(.*)/i, function(msg) {
         withUserToAsanaEmail(msg, msg.envelope.user, function(asanaEmail) {
             postTask(robot, msg, msg.match[2], asanaEmail);
         });
