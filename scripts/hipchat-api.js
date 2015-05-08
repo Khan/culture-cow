@@ -62,8 +62,11 @@ module.exports = function(robot) {
         // function.  To update this list, run the following, using
         // the hipchat_deploy_token from webapp's secrets.py.
         //    curl 'api.hipchat.com/v1/rooms/list?auth_token=<deploy_token>' | python -c 'import json, sys; print "".join("                \"%s\": \"%s\",\n" % (r["xmpp_jid"].split("@")[0].split("_", 1)[1].encode("utf-8"), r["name"].encode("utf-8")) for r in json.load(sys.stdin)["rooms"])'
-        // Note that if you want Culture Cow to actually *listen* inside
-        // a room, you also need to update bin/secrets:HUBOT_HIPCHAT_ROOMS.
+        //
+        // If culture cow should not be listening in any of the newly added
+        // rooms, add it to HUBOT_HIPCHAT_ROOMS_BLACKLIST in bin/secrets. You'll
+        // need to add the jabber ID of the room to the blacklist, which you can
+        // find in https://khanacademy.hipchat.com/account/xmpp.
         var rooms = {
                 "*schwag*": "*Schwag*",
                 "1762": "1762",
