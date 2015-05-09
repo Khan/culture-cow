@@ -35,7 +35,7 @@ Setup instructions
     #!/bin/bash
     export HUBOT_HIPCHAT_JID="..."
     export HUBOT_HIPCHAT_PASSWORD="..."
-    export HUBOT_HIPCHAT_ROOMS_BLACKLIST="6574_zzz_backup_decode_error_reporting,..."
+    export HUBOT_HIPCHAT_ROOMS_BLACKLIST="6574_zzz_backup_decode_error_reporting@conf.hipchat.com,..."
     export HUBOT_HIPCHAT_TOKEN="..."
 
     export FILE_BRAIN_PATH="..."
