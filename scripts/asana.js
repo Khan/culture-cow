@@ -147,7 +147,19 @@ module.exports = function(robot) {
     // TODO(csilvers): allow setting tags and such using msg.match[1]
     robot.hear(/^sherpa([^:]*): *(.*)/i, function(msg) {
         withUserToAsanaEmail(msg, msg.envelope.user, function(asanaEmail) {
-            postTask(robot, msg, msg.match[2], asanaEmail);
+            if (!asanaEmail) {
+              // Try busting the cache
+              console.log('WARNING: User ' +
+                          msg.envelope.user.name +
+                          ' not found in the Asana user list, busting cache.');
+              ASANA_NAME_AND_EMAIL_MAP = undefined;
+              withUserToAsanaEmail(msg, msg.envelope.user,
+                function(asanaEmail) {
+                  postTask(robot, msg, msg.match[2], asanaEmail);
+                });
+            } else {
+              postTask(robot, msg, msg.match[2], asanaEmail);
+            }
         });
     });
 };
