@@ -71,8 +71,6 @@ class ScoreKeeper
   subtract: (user, from) ->
     if @validate(user, from)
       user = @getUser(user)
-      if from == "howard chen"
-        @cache.scores["@2chainz"]--
       @cache.scores[user]--
       @saveUser(user, from)
 
