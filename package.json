@@ -30,7 +30,9 @@
     "node-trello": "*",
     "bang": "1.0.1",
     "shellwords": "0.0.1",
-    "wolfram-node": "0.0.1"
+    "wolfram-node": "0.0.1",
+    "underscore": "latest",
+    "clark": "latest"
   },
 
   "engines": {
