@@ -1,25 +1,20 @@
 # Description:
 #   Give or take away points. Keeps track and even prints out graphs.
-#
-# Dependencies:
-#   "underscore": ">= 1.0.0"
-#   "clark": "0.0.6"
+#   Based on the MIT licensed script at
+#   https://github.com/hubot-scripts/hubot-plusplus
 #
 # Configuration:
 #
 # Commands:
 #   <name>++
 #   <name>--
-#   hubot score <name>
-#   hubot top <amount>
-#   hubot bottom <amount>
-#   hubot scoreboard
+#   score <name>
+#   top <amount>
+#   bottom <amount>
+#   scoreboard
 #
 # Author:
-#   ajacksified
-
-_ = require("underscore")
-clark = require("clark").clark
+#   sam, calblueprint, ajacksified
 
 class ScoreKeeper
   constructor: (@robot) ->
@@ -122,9 +117,10 @@ class ScoreKeeper
 module.exports = (robot) ->
   scoreKeeper = new ScoreKeeper(robot)
 
-  robot.hear /([\w\S]+)([\W\s]*)?(\+\+)(.*)$/i, (msg) ->
+  robot.hear /^(\S+)\s*\+\+/i, (msg) ->
     name = msg.match[1].trim()
     from = msg.message.user.name
+    # Defaults to name so anything can be plus plus'd, not just users.
     real_name = scoreKeeper.findUserByMentionName(name)
 
     if from == real_name
@@ -135,7 +131,7 @@ module.exports = (robot) ->
 
     if newScore? then msg.send "#{name} has #{newScore} points."
 
-  robot.hear /([\w\S]+)([\W\s]*)?(\-\-)(.*)$/i, (msg) ->
+  robot.hear /^(\S+)\s*\-\-/i, (msg) ->
     name = msg.match[1].trim()
     from = msg.message.user.name
     real_name = scoreKeeper.findUserByMentionName(name)
@@ -147,13 +143,13 @@ module.exports = (robot) ->
     newScore = scoreKeeper.subtract(real_name, from)
     if newScore? then msg.send "#{name} has #{newScore} points."
 
-  robot.respond /score (for\s)?(.*)/i, (msg) ->
+  robot.hear /^score (for\s)?(\S+)$/i, (msg) ->
     name = msg.match[2].trim().toLowerCase()
     score = scoreKeeper.scoreForUser(name)
 
     msg.send "#{name} has #{score} points."
 
-  robot.respond /(top|bottom) (\d+)/i, (msg) ->
+  robot.hear /^(top|bottom) (\d+)$/i, (msg) ->
     amount = parseInt(msg.match[2])
     message = []
 
@@ -164,7 +160,7 @@ module.exports = (robot) ->
 
     msg.send message.join("\n")
 
-  robot.respond /scoreboard/i, (msg) ->
+  robot.hear /^scoreboard$/i, (msg) ->
     message = []
 
     tops = scoreKeeper['top'](scoreKeeper.cache.scores.length)
@@ -173,12 +169,3 @@ module.exports = (robot) ->
       message.push("#{i+1}. #{tops[i].name} : #{tops[i].score}")
 
     msg.send message.join("\n")
-
-  robot.respond /mention name for (.*)$/i, (msg) ->
-    person = msg.match[1]
-    msg.send scoreKeeper.findMentionNameByUser(person)
-
-  robot.respond /set mention name for \s (.*)/i, (msg) ->
-    name = msg.match[2].trim()
-    mention_name = msg.match[3].trim()
-    scoreKeeper.setMentionName name, mention_name
