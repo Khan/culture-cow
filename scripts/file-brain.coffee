@@ -15,10 +15,13 @@ module.exports = (robot) ->
   robot.brain.setAutoSave false
 
   load = ->
-    if fs.existsSync brainFile
+    try
       data = JSON.parse fs.readFileSync brainFile, encoding: 'utf-8'
       robot.brain.mergeData data
-    robot.brain.setAutoSave true
+      robot.brain.setAutoSave true
+    catch error
+      console.error 'Error in reading brain file. Check that ' + brainFile +
+                    ' exists and is valid JSON.'
 
   save = (data) ->
     fs.writeFileSync brainFile, JSON.stringify(data), 'utf-8'
