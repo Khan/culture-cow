@@ -29,6 +29,10 @@ class ScoreKeeper
       @cache.scores = @robot.brain.data.scores
       @cache.scoreLog = @robot.brain.data.scoreLog
 
+    # We have to load the brain again after attaching the event handler above
+    # since only on a load does the brain emit the 'loaded' event
+    fileBrain = require('./file-brain')(@robot);
+
   getUser: (user) ->
     @cache.scores[user] ||= 0
     user
