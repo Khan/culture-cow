@@ -1,31 +1,28 @@
-# Description:
-#   None
-#
-# Dependencies:
-#   None
-#
-# Configuration:
-#   FILE_BRAIN_PATH
+# Description
+#   A Hubot script to persist hubot's brain using text-file
 #
 # Commands:
 #   None
 #
 # Author:
-#   dustyburwell
+#   sam
 
-fs   = require 'fs'
-path = require 'path'
+fs = require 'fs'
 
 module.exports = (robot) ->
-  brainPath = '/home/ubuntu/culture-cow'
-  brainPath = path.join brainPath, 'brain-dump.json'
+  brainFile = '/home/ubuntu/culture-cow/brain-dump.json'
 
-  try
-    data = fs.readFileSync brainPath, 'utf-8'
-    if data
-      robot.brain.mergeData JSON.parse(data)
-  catch error
-      console.log('Unable to read file', error) unless error.code is 'ENOENT'
+  robot.brain.setAutoSave false
 
-  robot.brain.on 'save', (data) ->
-    fs.writeFileSync brainPath, JSON.stringify(data), 'utf-8'
+  load = ->
+    if fs.existsSync brainFile
+      data = JSON.parse fs.readFileSync brainFile, encoding: 'utf-8'
+      robot.brain.mergeData data
+    robot.brain.setAutoSave true
+
+  save = (data) ->
+    fs.writeFileSync brainFile, JSON.stringify(data), 'utf-8'
+
+  robot.brain.on 'save', save
+
+  load()
