@@ -9,7 +9,7 @@
  *   None
  *
  * Commands:
- *   sherpa: <new task title> - create a new support task with this title
+ *   sheepdog: <new task title> - create a new support task with this title
  *
  * Author:
  *   csilvers
@@ -128,7 +128,7 @@ var postTask = function(robot, msg, taskTitle, asanaEmail) {
                    color: "red",
                    message_format: "text",
                    room: msg.envelope.room,
-                   from: "Support Sherpa"
+                   from: "Support Sheepdog"
                });
            } else {
                robot.fancyMessage({
@@ -136,7 +136,7 @@ var postTask = function(robot, msg, taskTitle, asanaEmail) {
                    color: "purple",
                    message_format: "text",
                    room: msg.envelope.room,
-                   from: "Support Sherpa"
+                   from: "Support Sheepdog"
                });
            }
        });
@@ -145,7 +145,7 @@ var postTask = function(robot, msg, taskTitle, asanaEmail) {
 
 module.exports = function(robot) {
     // TODO(csilvers): allow setting tags and such using msg.match[1]
-    robot.hear(/^sherpa([^:]*): *(.*)/i, function(msg) {
+    robot.hear(/^sheepdog([^:]*): *(.*)/i, function(msg) {
         withUserToAsanaEmail(msg, msg.envelope.user, function(asanaEmail) {
             if (!asanaEmail) {
               // Try busting the cache
