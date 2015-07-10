@@ -84,7 +84,7 @@ var postTask = function(robot, msg, taskTitle, asanaEmail) {
             color: "red",
             message_format: "text",
             room: msg.envelope.room,
-            from: "Support Sherpa"
+            from: "Support Sheepdog"
         });
         return;
     }
