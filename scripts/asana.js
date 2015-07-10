@@ -84,7 +84,7 @@ var postTask = function(robot, msg, taskTitle, asanaEmail) {
             color: "red",
             message_format: "text",
             room: msg.envelope.room,
-            from: "Support Sheepdog"
+            from: "SupportSheepdog"  // Must be <= 15 characters
         });
         return;
     }
@@ -128,7 +128,7 @@ var postTask = function(robot, msg, taskTitle, asanaEmail) {
                    color: "red",
                    message_format: "text",
                    room: msg.envelope.room,
-                   from: "Support Sheepdog"
+                   from: "SupportSheepdog"
                });
            } else {
                robot.fancyMessage({
@@ -136,7 +136,7 @@ var postTask = function(robot, msg, taskTitle, asanaEmail) {
                    color: "purple",
                    message_format: "text",
                    room: msg.envelope.room,
-                   from: "Support Sheepdog"
+                   from: "SupportSheepdog"
                });
            }
        });
