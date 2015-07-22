@@ -135,17 +135,6 @@ module.exports = (robot) ->
 
     if newScore? then msg.send "#{name} has #{newScore} points."
 
-  robot.hear /^(\S+)\s*\-\-/i, (msg) ->
-    name = msg.match[1].trim()
-    from = msg.message.user.name
-    real_name = scoreKeeper.findUserByMentionName(name)
-
-    if from == real_name
-      msg.send "Why are you minus minusing yourself, #{name}?"
-      return
-
-    newScore = scoreKeeper.subtract(real_name, from)
-    if newScore? then msg.send "#{name} has #{newScore} points."
 
   robot.hear /^score (for\s)?(\S+)$/i, (msg) ->
     name = msg.match[2].trim().toLowerCase()
