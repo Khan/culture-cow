@@ -1,3 +1,68 @@
+const Trello = require('node-trello');
+const Q = require('q');
+const queueColumn = "Deploy Queue";
+const runningColumn = "Running";
+const doneColumn = "Completed";
+
+const t = new Trello(process.env.TRELLO_KEY, process.env.TRELLO_TOKEN);
+
+function getCards(trello, listId) {
+    return Q.ninvoke(trello, "get", "/1/lists/" + listId, {cards: "open"})
+        .then(function(data) { return data.cards; });
+}
+
+function getLists(trello, board) {
+    return Q.ninvoke(trello, "get", "/1/boards/" + board, {lists: "open", list_fields: "name"})
+        .then(function(data) { return data.lists; });
+}
+
+function getListIds(lists, desiredNames) {
+    function nameMatches(name) {
+        return function(el, idx, arr) {
+            return el['name'] === name;
+        };
+    }
+    var ids = [];
+    for (var name of desiredNames) {
+        ids.push(lists.find(nameMatches(name)).id);
+    }
+    return ids;
+}
+
+function getDeploymentState(trello, board) {
+    return getLists(trello, board)
+    .then(function(lists) {
+        return getListIds(lists, [queueColumn, runningColumn, doneColumn]);
+    }).then(function(ids) {
+        const queueId = ids[0];
+        const runningId = ids[1];
+        return getCards(trello, queueId).then(function(queueCards) {
+            return getCards(trello, runningId).then(function(runningCards) {
+                return {queue: queueCards, running: runningCards};
+            });
+        });
+    });
+}
+
+function updateDeploymentState() {
+    getDeploymentState(t, secrets.board).then(function(state) {
+        if (state.queue.length > 5) {
+            console.log("There's a nasty backup on deployments.");
+        }
+
+        console.log("QUEUE");
+        for (var card of state.queue) {
+            console.log("\t" + card.name);
+        }
+        console.log("\n\nRUNNING");
+        for (var card of state.running) {
+            console.log("\t" + card.name);
+        }
+    }).done();
+}
+
+updateDeploymentState;
+
 var queue = {
 
     notes:
