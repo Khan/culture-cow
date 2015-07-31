@@ -282,7 +282,6 @@ var handleDeployDone = function(robot, msg) {
 // fn takes a robot object and a hubot message object.
 var hearInDeployRoom = function(robot, regexp, fn) {
     robot.hear(regexp, function(msg) {
-
         if (!queue.DEBUG && msg.envelope.room !== "1s0s_deploys") {
             wrongRoom(robot, msg);
             return;

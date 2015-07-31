@@ -4,11 +4,17 @@ const queueColumn = "Deploy Queue";
 const runningColumn = "Running";
 const doneColumn = "Completed";
 
-const t = new Trello(process.env.TRELLO_KEY, process.env.TRELLO_TOKEN);
-
 function getCards(trello, listId) {
     return Q.ninvoke(trello, "get", "/1/lists/" + listId, {cards: "open"})
         .then(function(data) { return data.cards; });
+}
+
+function moveCard(trello, cardId, newListId) {
+    return Q.ninvoke(trello, "put", "/1/cards/" + cardId, {idList: newListId});
+}
+
+function commentOnCard(trello, cardId, comment) {
+    return Q.ninvoke(trello, "post", "/1/cards/" + cardId + "/actions/comments", {text: comment});
 }
 
 function getLists(trello, board) {
@@ -29,6 +35,10 @@ function getListIds(lists, desiredNames) {
     return ids;
 }
 
+moveCard;
+commentOnCard;
+getDeploymentState;
+
 function getDeploymentState(trello, board) {
     return getLists(trello, board)
     .then(function(lists) {
@@ -43,25 +53,6 @@ function getDeploymentState(trello, board) {
         });
     });
 }
-
-function updateDeploymentState() {
-    getDeploymentState(t, secrets.board).then(function(state) {
-        if (state.queue.length > 5) {
-            console.log("There's a nasty backup on deployments.");
-        }
-
-        console.log("QUEUE");
-        for (var card of state.queue) {
-            console.log("\t" + card.name);
-        }
-        console.log("\n\nRUNNING");
-        for (var card of state.running) {
-            console.log("\t" + card.name);
-        }
-    }).done();
-}
-
-updateDeploymentState;
 
 var queue = {
 
@@ -80,6 +71,14 @@ var queue = {
         , "     td  : changed() : accept a deploy queue string or array that's hipchat/slack/etc. agnostic"
         , "     td  : Use ES6 tagged template strings to update messages"
         ],
+
+    columnIds:
+        { queueId: null
+        , runningId: null
+        , doneId: null
+        },
+
+    trello: null,
 
     messages:
         { empty : "${users}: deploy queue's empty!"
@@ -115,11 +114,14 @@ var queue = {
 
         queue.DEBUG &&
         robot.hear  (queue.patterns.test,    queue.testIt);
-        //robot.topic (queue.patterns.topic,   this.changed);
         robot.hear  (queue.patterns.topic,   queue.changed);
         robot.hear  (queue.patterns.success, queue.next);
 
         console.info ("done: activate deploy listeners.");
+
+        console.info ("todo: initializing queue monitoring");
+
+        queue.startMonitoring();
     },
 
 
@@ -193,18 +195,20 @@ var queue = {
         console.info (users);
     },
 
-
-    deployed: function deployed () {
-        var deploying   = queue.deploying,
-            users       = queue.users;
-
-        deploying.user  = null;
-        deploying.since = null;
-
-        users && users.shift() && queue.changeState();
-        console.info (users);
+    startMonitoring: function startMonitoring () {
+        queue.trello = new Trello(process.env.TRELLO_KEY, process.env.TRELLO_TOKEN);
+        getLists(process.env.TRELLO_DEPLOYMENT_BOARD).then(function(lists) {
+            var ids = getListIds(lists, [queueColumn, runningColumn, doneColumn]);
+            queue.columnIds.queueId = ids[0];
+            queue.columnIds.runningId = ids[0];
+            queue.columnIds.doneId = ids[0];
+            queue.monitor();
+            setInterval(queue.monitor, 10000);
+        });
     },
 
+    monitor: function monitor () {
+    },
 
     next: function next () {
         // Advance the deploy queue when a deploy successfully completes or someone takes too long to start a deploy.
@@ -270,6 +274,6 @@ var queue = {
         res.send ("\n\n### deploys test commands ###\n\n");
     }
 
-};//{queue}
+};
 
 module.exports = queue;
