@@ -108,7 +108,7 @@ var queue = {
     notifying:
         { user  : null
         , since : null
-        , SLOW  : .25*60*1000,    //  5 minutes in milliseconds
+        , SLOW  : 5*60*1000,    //  5 minutes in milliseconds
         },
 
 
