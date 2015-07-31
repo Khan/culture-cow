@@ -65,8 +65,10 @@ updateDeploymentState;
 
 var queue = {
 
+    DEBUG: true,    // <===== SET TO false FOR PRODUCTION AND REAL DEPLOYS!!!
+
     notes:
-        [ "fyi  : msg:{message:{}, robot:{}}"
+        [ "fyi  : res:{message:{}, robot:{}}"
         , "done : Long deploy queue? @mention everyone in the queue about merging simple commits"
         , "done : Skip someone in the queue and @mention them about it if they don't respond in X minutes"
         , "done : Remove users from the queue after a successful deploy"
@@ -84,11 +86,13 @@ var queue = {
         , merge : "${users}: this deploy queue's long . . . Got simple commits? Why not merge?"
         , next  : "${users}: your turn to deploy. Auto-skipping in 5 minutes!"
         , skip  : "${users}: Sorry, team's waiting. Skipping you for now but you'll be up next"
+        , slow  : "${users}: Sorry, this deploy's taking a while..."
         },
 
     patterns:
         { names     : (/\w+/gi)
         , success   : (/\[.+\] Mr Gorilla: (@\w) .* Deploy of .* succeeded!/)
+        , test      : (/^test deploys/)
         , topic     : (/[+-\w]+\s+\|\s+\[.+\]/i)
         , users     : (/\${users}/)
         },
@@ -98,7 +102,7 @@ var queue = {
         , since : null
         , SLOW  : 30*60*1000,    // 30 minutes in milliseconds
         },
-        
+
     notifying:
         { user  : null
         , since : null
@@ -109,6 +113,8 @@ var queue = {
     activate: function activate (robot) {
         console.info ("todo: activate deploy listeners.");
 
+        queue.DEBUG &&
+        robot.hear  (queue.patterns.test,    queue.testIt);
         //robot.topic (queue.patterns.topic,   this.changed);
         robot.hear  (queue.patterns.topic,   queue.changed);
         robot.hear  (queue.patterns.success, queue.next);
@@ -120,11 +126,11 @@ var queue = {
     tooMany : 4,
     users   : null,
 
-    changed: function changed (msg) {
+    changed: function changed (res) {
         console.log ("\n\nqueue changed\n\n");
 
         // Extract usernames from deploy queue message
-        var users   = msg.message.text.match (queue.patterns.topic)[0];
+        var users   = res.message.text.match (queue.patterns.topic)[0];
         users       = users.match (queue.patterns.names);
         queue.users = users;
 
@@ -171,7 +177,7 @@ var queue = {
 
 
     complain: function complain () {
-        console.info ("todo: Sorry @all, this deploy's taking a while...");
+        queue.notify ({users:['all'], message:queue.messages.slow});
     },
 
 
@@ -182,7 +188,8 @@ var queue = {
         deploying.user  = user;
         deploying.since = Date.now();
 
-        users && (users[0] !== user) && users.unshift (user) && queue.changeState();
+        !users && (users = []);
+        (users[0] !== user) && users.unshift (user) && queue.changeState();
         console.info (users);
     },
 
@@ -202,10 +209,14 @@ var queue = {
     next: function next () {
         // Advance the deploy queue when a deploy successfully completes or someone takes too long to start a deploy.
         // todo: Update the queue in the HipChat room topic.
-
+        
         var notifying   = queue.notifying,
             users       = queue.users,
             user        = users && users[0];
+
+        if (!users || users.length <= 1) {
+            return;
+        }
 
         notifying.user  = user;
         notifying.since = Date.now();
@@ -239,10 +250,24 @@ var queue = {
             users       = queue.users,
             user        = users && users.shift();
 
+    try{ throw "\n\ndebugging skip()...\n\n"; }catch (e) { console.debug (e.stack); }
+        
+        
         notifying.user = notifying.since = null;
         users.splice (1, 0, user);
         queue.notify ({users: [user], message: queue.messages.skip});
         queue.next();
+    },
+
+    testIt: function testIt (res) {
+        queue.deploying.SLOW = 1*60*1000;
+        queue.notifying.SLOW = 7*1000;
+
+        res.send ("\n\n### deploys test commands ###\n\n");
+        res.send ("slow | [2,3,4]");
+        res.send ("sun, deploy slow");
+        res.send ("Deploy of <anything> succeeded!");
+        res.send ("\n\n### deploys test commands ###\n\n");
     }
 
 };//{queue}

@@ -10,7 +10,7 @@
 fs = require 'fs'
 
 module.exports = (robot) ->
-  brainFile = '/home/ubuntu/culture-cow/brain-dump.json'
+  brainFile = __dirname + '/../brain-dump.json' || '/home/ubuntu/culture-cow/brain-dump.json'
 
   robot.brain.setAutoSave false
 

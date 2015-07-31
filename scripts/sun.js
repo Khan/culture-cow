@@ -20,8 +20,9 @@
  *   csilvers
  */
 
-var http = require('http'),
-    querystring = require("querystring");
+var http        = require('http'),
+    querystring = require("querystring"),
+    queue       = require ("./deploys.js");
 
 
 // This is a list of currently allowed deploy commands and the
@@ -100,6 +101,11 @@ var wrongPipelineStep = function(robot, msg, badStep) {
 
 // postData is a url-encoded string, suitable for sending in the http body.
 var runOnJenkins = function(robot, msg, postData, hipchatMessage) {
+
+    if (queue.DEBUG) {
+        return;
+    }
+
     var options = {
         hostname: 'jenkins.khanacademy.org',
         port: 80,
@@ -168,6 +174,8 @@ var handleDeploy = function(robot, msg) {
         "BUILD_USER_ID_FROM_SCRIPT": caller + "@khanacademy.org",
     };
     var postData = querystring.stringify(postDataMap);
+
+    queue.deploy (deployBranch || caller);
 
     runOnJenkins(robot, msg, postData,
                  "Telling Jenkins to deploy branch " + deployBranch + ".");
@@ -264,6 +272,8 @@ var handleAfterMonitoring = function(robot, msg) {
 };
 
 var handleDeployDone = function(robot, msg) {
+    queue.deployed();
+
     // The old deploy is over, time to start a new one!
    setNextPipelineCommands({"deploy": true});
 };
@@ -272,10 +282,12 @@ var handleDeployDone = function(robot, msg) {
 // fn takes a robot object and a hubot message object.
 var hearInDeployRoom = function(robot, regexp, fn) {
     robot.hear(regexp, function(msg) {
-        if (msg.envelope.room !== "1s0s_deploys") {
+
+        if (!queue.DEBUG && msg.envelope.room !== "1s0s_deploys") {
             wrongRoom(robot, msg);
             return;
         }
+
         fn(robot, msg);
     });
 };
@@ -301,4 +313,6 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /\(successful\) finish up: type 'sun, finish up' or visit http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort and roll back: type 'sun, abort' or visit http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterMonitoring);
     hearInDeployRoom(robot, /Deploy of .* (failed[:.]|succeeded!)/, handleDeployDone);
     hearInDeployRoom(robot, /has manually released the deploy lock/, handleDeployDone);
+
+    queue.activate (robot);
 };
