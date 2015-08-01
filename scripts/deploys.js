@@ -92,8 +92,9 @@ var queue = {
         },
 
     patterns:
-        { names     : (/\w+/gi)
-        , success   : (/\[.+\] Mr Gorilla: (@\w) .* Deploy of .* succeeded!/)
+        { failure   : (/Deploy of .* failed/)
+        , names     : (/\w+/gi)
+        , success   : (/Deploy of .* succeeded!/)
         , test      : (/^test deploys/)
         , topic     : (/[+-\w]+\s+\|\s+\[.+\]/i)
         , users     : (/\${users}/)
@@ -128,6 +129,7 @@ var queue = {
     },
 
     enqueue: function enqueue (user) {
+        queue.DEBUG && !user && (user = "Test User "+Math.random());
         addCard(queue.trello, process.env.TRELLO_BOARD_ID, queueColumn, user || "dumbass, don't run this from the repl");
     },
 
@@ -146,18 +148,17 @@ var queue = {
         switch (true) {
             case !(users && users.length):
                 queue.notify ({users: ['all'], message: queue.messages.empty});
-                break;
+                return;
 
             case users.length >= queue.tooMany:
                 queue.notify ({users: users, message: queue.messages.merge});
-                queue.changeState();
                 break;
 
             default:
-                queue.changeState();
                 break;
         }
 
+        queue.changeState();
         console.info ("\n\nusers: " + users);
     },
 
@@ -197,7 +198,7 @@ var queue = {
         deploying.user  = user;
         deploying.since = Date.now();
 
-        !users && (users = []);
+        !users && (queue.users = users = []);
         (users[0] !== user) && users.unshift (user) && queue.changeState();
         console.info (users);
     },
@@ -211,7 +212,7 @@ var queue = {
     monitor: function monitor () {
         getDeploymentState(queue.trello, process.env.TRELLO_BOARD_ID)
         .then(function(state) {
-            console.log(state);
+//            console.log(state);
             moveCard;
             commentOnCard;
         }).done();
@@ -260,8 +261,6 @@ var queue = {
         var notifying   = queue.notifying,
             users       = queue.users,
             user        = users && users.shift();
-
-    try{ throw "\n\ndebugging skip()...\n\n"; }catch (e) { console.debug (e.stack); }
 
         notifying.user = notifying.since = null;
         users.splice (1, 0, user);

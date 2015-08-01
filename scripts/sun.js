@@ -103,6 +103,7 @@ var wrongPipelineStep = function(robot, msg, badStep) {
 var runOnJenkins = function(robot, msg, postData, hipchatMessage) {
 
     if (queue.DEBUG) {
+        console.log (hipchatMessage);
         return;
     }
 
