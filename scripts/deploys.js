@@ -23,21 +23,16 @@ function getLists(trello, board) {
 }
 
 function getListIds(lists, desiredNames) {
-    function nameMatches(name) {
-        return function(el, idx, arr) {
-            return el['name'] === name;
-        };
-    }
     var ids = [];
+    var idMap = {};
+    for (var list of lists) {
+        idMap[list.name] = list.id;
+    }
     for (var name of desiredNames) {
-        ids.push(lists.find(nameMatches(name)).id);
+        ids.push(idMap[name]);
     }
     return ids;
 }
-
-moveCard;
-commentOnCard;
-getDeploymentState;
 
 function getDeploymentState(trello, board) {
     return getLists(trello, board)
@@ -197,23 +192,24 @@ var queue = {
 
     startMonitoring: function startMonitoring () {
         queue.trello = new Trello(process.env.TRELLO_KEY, process.env.TRELLO_TOKEN);
-        getLists(process.env.TRELLO_DEPLOYMENT_BOARD).then(function(lists) {
-            var ids = getListIds(lists, [queueColumn, runningColumn, doneColumn]);
-            queue.columnIds.queueId = ids[0];
-            queue.columnIds.runningId = ids[0];
-            queue.columnIds.doneId = ids[0];
-            queue.monitor();
-            setInterval(queue.monitor, 10000);
-        });
+        queue.monitor();
+        setInterval(queue.monitor, 3000);
     },
 
     monitor: function monitor () {
+        getDeploymentState(queue.trello, process.env.TRELLO_BOARD_ID)
+        .then(function(state) {
+            console.log(state);
+            moveCard;
+            commentOnCard;
+            nameMatches;
+        }).done();
     },
 
     next: function next () {
         // Advance the deploy queue when a deploy successfully completes or someone takes too long to start a deploy.
         // todo: Update the queue in the HipChat room topic.
-        
+
         var notifying   = queue.notifying,
             users       = queue.users,
             user        = users && users[0];
@@ -255,8 +251,7 @@ var queue = {
             user        = users && users.shift();
 
     try{ throw "\n\ndebugging skip()...\n\n"; }catch (e) { console.debug (e.stack); }
-        
-        
+
         notifying.user = notifying.since = null;
         users.splice (1, 0, user);
         queue.notify ({users: [user], message: queue.messages.skip});
