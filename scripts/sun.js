@@ -244,6 +244,11 @@ var handleEmergencyRollback = function(robot, msg) {
                  "version");
 };
 
+var handleAdd = function(robot, msg) {
+    queue.enqueue(msg.envelope.user.mention_name);
+    console.log('enqueued!');
+};
+
 
 var _appendJobname = function(jobname, otherPostParams) {
     return otherPostParams + '&job=' + querystring.escape(jobname);
@@ -304,6 +309,7 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /^sun,\s+rollback.*$/i, handleRollback);
     hearInDeployRoom(robot, /^sun,\s+emergency rollback.*$/i,
                      handleEmergencyRollback);
+    hearInDeployRoom(robot, /^sun,\s+add\s+me.*/i, handleAdd);
 
     // These are the Jenkins-emitted hipchat messages we listen for.
     hearInDeployRoom(robot, /\(failed\) abort: http:\/\/jenkins.khanacademy.org(.*\/stop)$/, handleAfterStart);

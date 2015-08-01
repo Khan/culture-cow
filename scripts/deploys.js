@@ -9,6 +9,14 @@ function getCards(trello, listId) {
         .then(function(data) { return data.cards; });
 }
 
+function addCard(trello, boardId, listName, title) {
+    return getLists(trello, boardId)
+    .then(function(lists) { return getListIds(lists, [listName]); })
+    .then(function(lists) {
+        return Q.ninvoke(trello, "post", "/1/lists/" + lists[0] + "/cards", {name: title});
+    }).done();
+}
+
 function moveCard(trello, cardId, newListId) {
     return Q.ninvoke(trello, "put", "/1/cards/" + cardId, {idList: newListId});
 }
@@ -119,6 +127,10 @@ var queue = {
         queue.startMonitoring();
     },
 
+    enqueue: function enqueue (user) {
+        addCard(queue.trello, process.env.TRELLO_BOARD_ID, queueColumn, user || "dumbass, don't run this from the repl");
+    },
+
 
     tooMany : 4,
     users   : null,
@@ -202,7 +214,6 @@ var queue = {
             console.log(state);
             moveCard;
             commentOnCard;
-            nameMatches;
         }).done();
     },
 
