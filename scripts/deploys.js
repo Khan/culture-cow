@@ -1,36 +1,41 @@
+/// <reference path="../typings/node/node.d.ts"/>
 const Trello = require('node-trello');
 const Q = require('q');
-const queueColumn = "Deploy Queue";
-const runningColumn = "Running";
+const queueColumn = "In Line";
+const runningColumn = "Deploying";
 const doneColumn = "Completed";
 
-function getCards(trello, listId) {
+function _getCards(trello, listId) {
     return Q.ninvoke(trello, "get", "/1/lists/" + listId, {cards: "open"})
         .then(function(data) { return data.cards; });
 }
 
-function addCard(trello, boardId, listName, title) {
-    return getLists(trello, boardId)
-    .then(function(lists) { return getListIds(lists, [listName]); })
-    .then(function(lists) {
-        return Q.ninvoke(trello, "post", "/1/lists/" + lists[0] + "/cards", {name: title});
-    }).done();
+function _getComments(trello, cardId) {
+    return Q.ninvoke(trello, "get", "/1/cards/" + cardId + "/actions", {filter: "commentCard"});
 }
 
-function moveCard(trello, cardId, newListId) {
-    return Q.ninvoke(trello, "put", "/1/cards/" + cardId, {idList: newListId});
+function _addCard(trello, listId, title) {
+    return Q.ninvoke(trello, "post", "/1/lists/" + listId + "/cards", {name: title});
 }
 
-function commentOnCard(trello, cardId, comment) {
+function _moveCard(trello, cardId, listId, position) {
+    var args = {idList: listId};
+    if (position !== undefined) {
+        args['pos'] = position;
+    }
+    return Q.ninvoke(trello, "put", "/1/cards/" + cardId, args);
+}
+
+function _commentOnCard(trello, cardId, comment) {
     return Q.ninvoke(trello, "post", "/1/cards/" + cardId + "/actions/comments", {text: comment});
 }
 
-function getLists(trello, board) {
+function _getLists(trello, board) {
     return Q.ninvoke(trello, "get", "/1/boards/" + board, {lists: "open", list_fields: "name"})
         .then(function(data) { return data.lists; });
 }
 
-function getListIds(lists, desiredNames) {
+function _getListIds(lists, desiredNames) {
     var ids = [];
     var idMap = {};
     for (var list of lists) {
@@ -42,38 +47,9 @@ function getListIds(lists, desiredNames) {
     return ids;
 }
 
-function getDeploymentState(trello, board) {
-    return getLists(trello, board)
-    .then(function(lists) {
-        return getListIds(lists, [queueColumn, runningColumn, doneColumn]);
-    }).then(function(ids) {
-        const queueId = ids[0];
-        const runningId = ids[1];
-        return getCards(trello, queueId).then(function(queueCards) {
-            return getCards(trello, runningId).then(function(runningCards) {
-                return {queue: queueCards, running: runningCards};
-            });
-        });
-    });
-}
-
 var queue = {
 
     DEBUG: true,    // <===== SET TO false FOR PRODUCTION AND REAL DEPLOYS!!!
-
-    notes:
-        [ "fyi  : res:{message:{}, robot:{}}"
-        , "done : Long deploy queue? @mention everyone in the queue about merging simple commits"
-        , "done : Skip someone in the queue and @mention them about it if they don't respond in X minutes"
-        , "done : Remove users from the queue after a successful deploy"
-        , "done : @mention the next person in queue after the previous deploy completes"
-
-        , "polish"
-        , "     td  : Create a Notifier interface and registration mechanism to enable notifying via HipChat, Slack, or something else."
-        , "     td  : notify()  : use Notifier interface to notify via HipChat, Slack, or something else."
-        , "     td  : changed() : accept a deploy queue string or array that's hipchat/slack/etc. agnostic"
-        , "     td  : Use ES6 tagged template strings to update messages"
-        ],
 
     columnIds:
         { queueId: null
@@ -82,203 +58,162 @@ var queue = {
         },
 
     trello: null,
-
-    messages:
-        { empty : "${users}: deploy queue's empty!"
-        , merge : "${users}: this deploy queue's long . . . Got simple commits? Why not merge?"
-        , next  : "${users}: your turn to deploy. Auto-skipping in 5 minutes!"
-        , skip  : "${users}: Sorry, team's waiting. Skipping you for now but you'll be up next"
-        , slow  : "${users}: Sorry, this deploy's taking a while..."
-        },
-
-    patterns:
-        { failure   : (/Deploy of .* failed/)
-        , names     : (/\w+/gi)
-        , success   : (/Deploy of .* succeeded!/)
-        , test      : (/^test deploys/)
-        , topic     : (/[+-\w]+\s+\|\s+\[.+\]/i)
-        , users     : (/\${users}/)
-        },
-
-    deploying:
-        { user  : null
-        , since : null
-        , SLOW  : 30*60*1000,    // 30 minutes in milliseconds
-        },
-
-    notifying:
-        { user  : null
-        , since : null
-        , SLOW  : 5*60*1000,    //  5 minutes in milliseconds
-        },
-
+    
+    severity: {
+        HIGH: "HIGH",
+        MEDIUM: "MEDIUM",
+        LOW: "LOW"
+    },
+    
+    notifyPatience: 30*1000,// 5*60*1000,
+    
+    deployPatience: 30*60*1000,
+        
+    notifierCallbacks: [],
+    
+    setSubjectCallbacks: [],
+    
+    subject: "",
 
     activate: function activate (robot) {
-        console.info ("todo: activate deploy listeners.");
-
-        queue.DEBUG &&
-        robot.hear  (queue.patterns.test,    queue.testIt);
-        robot.hear  (queue.patterns.topic,   queue.changed);
-        robot.hear  (queue.patterns.success, queue.next);
-
-        console.info ("done: activate deploy listeners.");
-
-        console.info ("todo: initializing queue monitoring");
-
         queue.startMonitoring();
+    },
+    
+    startDeploy: function deploy (user) {
+        queue.getDeploymentState()
+        .then(function(state) {
+            var cardId = null;
+            for (var card of state.queue) {
+                var components = card.name.split("+");
+                for (var name of components) {
+                    if (name === user) {
+                        cardId = card.id;
+                    }
+                }
+            }
+            if (cardId !== null) {
+                _commentOnCard(queue.trello, cardId, "Beginning deploy!");
+                _moveCard(queue.trello, cardId, queue.columnIds.runningId);
+            }
+        });
+    },
+    
+    markSuccess: function markSuccess (user) {
+        queue.getDeploymentState()
+        .then(function(state) {
+            _moveCard(queue.trello, state.running[0].id, queue.columnIds.doneId);
+        });
+    },
+    
+    markFailure: function markFailure (user) {
+        _moveCard(queue.trello, queue.deploying.cardId, doneColumn);
+        
+        queue.deploying.user = queue.deploying.since = queue.deploying.cardId = null;
     },
 
     enqueue: function enqueue (user) {
-        queue.DEBUG && !user && (user = "Test User "+Math.random());
-        addCard(queue.trello, process.env.TRELLO_BOARD_ID, queueColumn, user || "dumbass, don't run this from the repl");
+        _addCard(queue.trello, queue.columnIds.queueId, user);
     },
-
-
-    tooMany : 4,
-    users   : null,
-
-    changed: function changed (res) {
-        console.log ("\n\nqueue changed\n\n");
-
-        // Extract usernames from deploy queue message
-        var users   = res.message.text.match (queue.patterns.topic)[0];
-        users       = users.match (queue.patterns.names);
-        queue.users = users;
-
-        switch (true) {
-            case !(users && users.length):
-                queue.notify ({users: ['all'], message: queue.messages.empty});
-                return;
-
-            case users.length >= queue.tooMany:
-                queue.notify ({users: users, message: queue.messages.merge});
-                break;
-
-            default:
-                break;
-        }
-
-        queue.changeState();
-        console.info ("\n\nusers: " + users);
-    },
-
-
-    changeState: function changeState () {
-        var deploying   = queue.deploying,
-            notifying   = queue.notifying,
-            user        = queue.users && queue.users [0];
-
-        switch (true) {
-            case !user:
-                return;
-
-            case deploying.user === user:
-                (Date.now() - deploying.since >= deploying.SLOW) && queue.complain();
-                return;
-
-            case notifying.user === user:
-                (Date.now() - notifying.since >= notifying.SLOW) && queue.skip();
-                return;
-
-            default:
-                queue.next();
-        }
-    },
-
-
-    complain: function complain () {
-        queue.notify ({users:['all'], message:queue.messages.slow});
-    },
-
-
-    deploy: function deploy (user) {
-        var deploying   = queue.deploying,
-            users       = queue.users;
-
-        deploying.user  = user;
-        deploying.since = Date.now();
-
-        !users && (queue.users = users = []);
-        (users[0] !== user) && users.unshift (user) && queue.changeState();
-        console.info (users);
+    
+    getDeploymentState: function deploymentState() {
+        return _getCards(queue.trello, queue.columnIds.queueId).then(function(queueCards) {
+            return _getCards(queue.trello, queue.columnIds.runningId).then(function(runningCards) {
+                return {queue: queueCards, running: runningCards};
+            });
+        });
     },
 
     startMonitoring: function startMonitoring () {
         queue.trello = new Trello(process.env.TRELLO_KEY, process.env.TRELLO_TOKEN);
-        queue.monitor();
-        setInterval(queue.monitor, 3000);
+        queue.initializeListIds().then(function() {
+            setInterval(queue.monitor, 3000);
+        }).done();
+    },
+    
+    initializeListIds: function initializeListIds() {
+        return _getLists(queue.trello, process.env.TRELLO_BOARD_ID)
+        .then(function(lists) {
+            return _getListIds(lists, [queueColumn, runningColumn, doneColumn]);
+        }).then(function(ids) {
+            queue.columnIds.queueId = ids[0];
+            queue.columnIds.runningId = ids[1];
+            queue.columnIds.doneId = ids[2];
+        });
     },
 
     monitor: function monitor () {
-        getDeploymentState(queue.trello, process.env.TRELLO_BOARD_ID)
+        queue.getDeploymentState()
         .then(function(state) {
-//            console.log(state);
-            moveCard;
-            commentOnCard;
+            queue.handleUserNotifications(state);
+            queue.handleLongDeploy(state);
+            queue.updateSubject(state);
         }).done();
     },
-
-    next: function next () {
-        // Advance the deploy queue when a deploy successfully completes or someone takes too long to start a deploy.
-        // todo: Update the queue in the HipChat room topic.
-
-        var notifying   = queue.notifying,
-            users       = queue.users,
-            user        = users && users[0];
-
-        if (!users || users.length <= 1) {
-            return;
+    
+    handleUserNotifications: function handleUserNotifications(state) {
+        if (state.running.length === 0 && state.queue.length > 0) {
+            var card = state.queue[0];
+            _getComments(queue.trello, card.id)
+            .then(function(comments) {
+                var lastComment = comments && comments[0] ? comments[0].data.text : "";
+                var lastUpdated = Date.parse(card.dateLastActivity);
+                if (lastComment.indexOf("Notified ") === 0 && (Date.now() - lastUpdated) > queue.notifyPatience) {
+                    if (state.queue.length === 1) {
+                        queue.notify(card.name, "hey, you know you're clear to deploy, right?", queue.severity.HIGH);
+                        _commentOnCard(queue.trello, card.id, "Notified " + card.name + " again...");
+                    } else {
+                        queue.notify(card.name, "sorry; there are others in the queue, so sending you to the back", queue.severity.HIGH);
+                        _commentOnCard(queue.trello, card.id, "Gave up on " + card.name);
+                        queue.rotateDeploymentQueue(state);
+                    }
+                } else {
+                    if (lastComment.indexOf("Notified ") !== 0) {
+                        queue.notify(card.name, "you're up!", queue.severity.HIGH);
+                        _commentOnCard(queue.trello, card.id, "Notified " + card.name + " they're up");
+                    }
+                }
+            });
         }
+    },
+    
+    handleLongDeploy: function handleLongDeploy(state) {
+        // FIXME: TODO
+    },
 
-        notifying.user  = user;
-        notifying.since = Date.now();
-
-        queue.notify ({users:[user], message: queue.messages.next});
-
-        function autoSkip () {
-            clearTimeout (skipper);
-            queue.skip();
+    rotateDeploymentQueue: function rotateDeploymentQueue (state) {
+        _moveCard(queue.trello, state.queue[0].id, queue.columnIds.queueId, 'bottom').done();
+    },
+    
+    notify: function notify (user, message, severity) {
+        for (var callback of queue.notifierCallbacks) {
+            callback(user, message, severity);
         }
-        var skipper = setTimeout (autoSkip, notifying.SLOW);
     },
-
-
-    notify: function notify (notice) {
-        var users   = notice.users,
-            message = notice.message;
-
-        users   && (users   = '@' + users.join (' + @'));
-        message && (message = message.replace (queue.patterns.users, users));
-
-        console.info ("\n");
-        console.info ("todo: notify: @mention users : " + users);
-        console.info ("todo: notify: with message   : " + message);
-        console.info ("queue : " + queue.users);
+    
+    addNotificationCallback: function addNotificationCallback (notifier) {
+        queue.notifierCallbacks.push(notifier);
     },
-
-
-    skip: function skip () {
-        var notifying   = queue.notifying,
-            users       = queue.users,
-            user        = users && users.shift();
-
-        notifying.user = notifying.since = null;
-        users.splice (1, 0, user);
-        queue.notify ({users: [user], message: queue.messages.skip});
-        queue.next();
+    
+    updateSubject: function updateSubject (state) {
+        var prefix = state.running.length === 1 ? state.running[0].name + " | " : "";
+        var suffix = "[" + state.queue.map(function(card) { return card.name; }).join(", ") + "]";
+        var subject = prefix + suffix;
+        if (subject !== queue.subject) {
+            console.log("changing subject: " + queue.subject + " ===> " + subject);
+            queue.subject = subject;
+            queue.setSubject(subject);
+        }
     },
-
-    testIt: function testIt (res) {
-        queue.deploying.SLOW = 1*60*1000;
-        queue.notifying.SLOW = 7*1000;
-
-        res.send ("\n\n### deploys test commands ###\n\n");
-        res.send ("slow | [2,3,4]");
-        res.send ("sun, deploy slow");
-        res.send ("Deploy of <anything> succeeded!");
-        res.send ("\n\n### deploys test commands ###\n\n");
+    
+    setSubject: function setSubject (subject) {
+        for (var callback of queue.setSubjectCallbacks) {
+            callback(subject);
+        }
+    },
+    
+    addSubjectCallback: function addSubjectUpdater (updater) {
+        queue.setSubjectCallbacks.push(updater);
     }
-
 };
 
 module.exports = queue;

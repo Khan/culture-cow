@@ -1,3 +1,4 @@
+/* global robot */
 /**
  * Description:
  *   Send prod-deploy commands to jenkins.
@@ -24,6 +25,7 @@ var http        = require('http'),
     querystring = require("querystring"),
     queue       = require ("./deploys.js");
 
+const DEPLOYMENT_ROOM = "hackathon";
 
 // This is a list of currently allowed deploy commands and the
 // post-data to send to jenkins to have it do that command.  (The
@@ -58,7 +60,7 @@ var onHttpError = function(res) {
         msg: ("(sadpanda) Jenkins won't listen to me.  " +
               "Go talk to it yourself."),
         color: "red",
-        room: "1s0s_deploys",
+        room: DEPLOYMENT_ROOM,
         from: "Sun Wukong",
         message_format: "text"
     };
@@ -176,7 +178,7 @@ var handleDeploy = function(robot, msg) {
     };
     var postData = querystring.stringify(postDataMap);
 
-    queue.deploy (deployBranch || caller);
+    queue.startDeploy (caller || deployBranch);
 
     runOnJenkins(robot, msg, postData,
                  "Telling Jenkins to deploy branch " + deployBranch + ".");
@@ -218,12 +220,13 @@ var handleAbort = function(robot, msg) {
 };
 
 var handleFinish = function(robot, msg) {
-    if (!gNextPipelineCommands.abort) {
+    if (false && !gNextPipelineCommands.abort) {
         wrongPipelineStep(robot, msg, 'finish');
         return;
     }
     runOnJenkins(robot, msg, gNextPipelineCommands.finish,
                  "Telling Jenkins to finish this deploy!");
+    queue.markSuccess(msg.envelope.user.mention_name || "bpollack");
 };
 
 var handleRollback = function(robot, msg) {
@@ -246,8 +249,7 @@ var handleEmergencyRollback = function(robot, msg) {
 };
 
 var handleAdd = function(robot, msg) {
-    queue.enqueue(msg.envelope.user.mention_name);
-    console.log('enqueued!');
+    queue.enqueue(msg.envelope.user.mention_name || "bpollack");
 };
 
 
@@ -288,7 +290,7 @@ var handleDeployDone = function(robot, msg) {
 // fn takes a robot object and a hubot message object.
 var hearInDeployRoom = function(robot, regexp, fn) {
     robot.hear(regexp, function(msg) {
-        if (!queue.DEBUG && msg.envelope.room !== "1s0s_deploys") {
+        if (!queue.DEBUG && msg.envelope.room !== DEPLOYMENT_ROOM) {
             wrongRoom(robot, msg);
             return;
         }
@@ -297,20 +299,28 @@ var hearInDeployRoom = function(robot, regexp, fn) {
     });
 };
 
+var notify = function(user, message, severity) {
+    var s = (user ? "@" + user + ": " : "") + message;
+    console.log(severity + " :: " + s);
+};
+
+var setSubject = function(s) {
+    console.log("NEW SUBJECT: " + s);
+};
 
 module.exports = function(robot) {
-    hearInDeployRoom(robot, /^sun,\s+ping$/i, handlePing);
+    hearInDeployRoom(robot, /^moon,\s+ping$/i, handlePing);
 
     // These are the user-typed commands we listen for.
-    hearInDeployRoom(robot, /^sun,\s+deploy\s+(?:branch\s+)?([^,]*)(, dagnabit)?$/i, handleDeploy);
-    hearInDeployRoom(robot, /^sun,\s+set.default$/i, handleSetDefault);
-    hearInDeployRoom(robot, /^sun,\s+abort.*$/i, handleAbort);
-    hearInDeployRoom(robot, /^sun,\s+finish.*$/i, handleFinish);
+    hearInDeployRoom(robot, /^moon,\s+deploy\s+(?:branch\s+)?([^,]*)(, dagnabit)?$/i, handleDeploy);
+    hearInDeployRoom(robot, /^moon,\s+set.default$/i, handleSetDefault);
+    hearInDeployRoom(robot, /^moon,\s+abort.*$/i, handleAbort);
+    hearInDeployRoom(robot, /^moon,\s+finish.*$/i, handleFinish);
     // Does an emergency rollback, outside the deploy process
-    hearInDeployRoom(robot, /^sun,\s+rollback.*$/i, handleRollback);
-    hearInDeployRoom(robot, /^sun,\s+emergency rollback.*$/i,
+    hearInDeployRoom(robot, /^moon,\s+rollback.*$/i, handleRollback);
+    hearInDeployRoom(robot, /^moon,\s+emergency rollback.*$/i,
                      handleEmergencyRollback);
-    hearInDeployRoom(robot, /^sun,\s+add\s+me.*/i, handleAdd);
+    hearInDeployRoom(robot, /^moon,\s+add\s+me.*/i, handleAdd);
 
     // These are the Jenkins-emitted hipchat messages we listen for.
     hearInDeployRoom(robot, /\(failed\) abort: http:\/\/jenkins.khanacademy.org(.*\/stop)$/, handleAfterStart);
@@ -320,5 +330,24 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /Deploy of .* (failed[:.]|succeeded!)/, handleDeployDone);
     hearInDeployRoom(robot, /has manually released the deploy lock/, handleDeployDone);
 
+    queue.addNotificationCallback((function(r) {
+        return function(user, message, severity) {
+            var s = (user ? "@" + user + ": " : "") + message;
+            r.fancyMessage({
+                msg: s,
+                color: severity === queue.severity.HIGH ? "red" : "green",
+                room: DEPLOYMENT_ROOM,
+                from: "Moon Wukong",
+            });
+        };
+    })(robot));
+    queue.addNotificationCallback(notify);
+    queue.addSubjectCallback((function(r) {
+        return function(s) {
+            console.log(r.messageRoom);
+            r.setTopic(DEPLOYMENT_ROOM, s);
+        };
+    })(robot));
+    queue.addSubjectCallback(setSubject);
     queue.activate (robot);
 };
