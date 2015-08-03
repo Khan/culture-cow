@@ -1,4 +1,3 @@
-/// <reference path="../typings/node/node.d.ts"/>
 const Trello = require('node-trello');
 const Q = require('q');
 const queueColumn = "In Line";
@@ -49,7 +48,7 @@ function _getListIds(lists, desiredNames) {
 
 var queue = {
 
-    DEBUG: true,    // <===== SET TO false FOR PRODUCTION AND REAL DEPLOYS!!!
+    DEBUG: process.env.HUBOT_DEBUG,
 
     columnIds:
         { queueId: null
@@ -58,28 +57,28 @@ var queue = {
         },
 
     trello: null,
-    
+
     severity: {
         HIGH: "HIGH",
         MEDIUM: "MEDIUM",
         LOW: "LOW"
     },
-    
+
     notifyPatience: 30*1000,// 5*60*1000,
-    
+
     deployPatience: 30*60*1000,
-        
+
     notifierCallbacks: [],
-    
+
     setSubjectCallbacks: [],
-    
+
     subject: "",
 
-    activate: function activate (robot) {
+    activate: function activate(robot) {
         queue.startMonitoring();
     },
-    
-    startDeploy: function deploy (user) {
+
+    startDeploy: function deploy(user) {
         queue.getDeploymentState()
         .then(function(state) {
             var cardId = null;
@@ -97,24 +96,24 @@ var queue = {
             }
         });
     },
-    
-    markSuccess: function markSuccess (user) {
+
+    markSuccess: function markSuccess(user) {
         queue.getDeploymentState()
         .then(function(state) {
             _moveCard(queue.trello, state.running[0].id, queue.columnIds.doneId);
         });
     },
-    
-    markFailure: function markFailure (user) {
+
+    markFailure: function markFailure(user) {
         _moveCard(queue.trello, queue.deploying.cardId, doneColumn);
-        
+
         queue.deploying.user = queue.deploying.since = queue.deploying.cardId = null;
     },
 
-    enqueue: function enqueue (user) {
+    enqueue: function enqueue(user) {
         _addCard(queue.trello, queue.columnIds.queueId, user);
     },
-    
+
     getDeploymentState: function deploymentState() {
         return _getCards(queue.trello, queue.columnIds.queueId).then(function(queueCards) {
             return _getCards(queue.trello, queue.columnIds.runningId).then(function(runningCards) {
@@ -123,13 +122,13 @@ var queue = {
         });
     },
 
-    startMonitoring: function startMonitoring () {
+    startMonitoring: function startMonitoring() {
         queue.trello = new Trello(process.env.TRELLO_KEY, process.env.TRELLO_TOKEN);
         queue.initializeListIds().then(function() {
             setInterval(queue.monitor, 3000);
         }).done();
     },
-    
+
     initializeListIds: function initializeListIds() {
         return _getLists(queue.trello, process.env.TRELLO_BOARD_ID)
         .then(function(lists) {
@@ -141,7 +140,7 @@ var queue = {
         });
     },
 
-    monitor: function monitor () {
+    monitor: function monitor() {
         queue.getDeploymentState()
         .then(function(state) {
             queue.handleUserNotifications(state);
@@ -149,7 +148,7 @@ var queue = {
             queue.updateSubject(state);
         }).done();
     },
-    
+
     handleUserNotifications: function handleUserNotifications(state) {
         if (state.running.length === 0 && state.queue.length > 0) {
             var card = state.queue[0];
@@ -168,50 +167,45 @@ var queue = {
                     }
                 } else {
                     if (lastComment.indexOf("Notified ") !== 0) {
-                        queue.notify(card.name, "you're up!", queue.severity.HIGH);
+                        queue.notify(card.name, "you're up!", queue.severity.LOW);
                         _commentOnCard(queue.trello, card.id, "Notified " + card.name + " they're up");
                     }
                 }
             });
         }
     },
-    
-    handleLongDeploy: function handleLongDeploy(state) {
-        // FIXME: TODO
-    },
 
-    rotateDeploymentQueue: function rotateDeploymentQueue (state) {
+    rotateDeploymentQueue: function rotateDeploymentQueue(state) {
         _moveCard(queue.trello, state.queue[0].id, queue.columnIds.queueId, 'bottom').done();
     },
-    
-    notify: function notify (user, message, severity) {
+
+    notify: function notify(user, message, severity) {
         for (var callback of queue.notifierCallbacks) {
             callback(user, message, severity);
         }
     },
-    
-    addNotificationCallback: function addNotificationCallback (notifier) {
+
+    addNotificationCallback: function addNotificationCallback(notifier) {
         queue.notifierCallbacks.push(notifier);
     },
-    
-    updateSubject: function updateSubject (state) {
+
+    updateSubject: function updateSubject(state) {
         var prefix = state.running.length === 1 ? state.running[0].name + " | " : "";
         var suffix = "[" + state.queue.map(function(card) { return card.name; }).join(", ") + "]";
         var subject = prefix + suffix;
         if (subject !== queue.subject) {
-            console.log("changing subject: " + queue.subject + " ===> " + subject);
             queue.subject = subject;
             queue.setSubject(subject);
         }
     },
-    
-    setSubject: function setSubject (subject) {
+
+    setSubject: function setSubject(subject) {
         for (var callback of queue.setSubjectCallbacks) {
             callback(subject);
         }
     },
-    
-    addSubjectCallback: function addSubjectUpdater (updater) {
+
+    addSubjectCallback: function addSubjectUpdater(updater) {
         queue.setSubjectCallbacks.push(updater);
     }
 };

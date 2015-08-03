@@ -247,7 +247,7 @@ module.exports = function(robot) {
             });
         });
     };
-    
+
     robot.setTopic = function(room, topic) {
         if (!topic) {
             console.error("no topic provided, mooooo!");
@@ -257,9 +257,7 @@ module.exports = function(robot) {
             console.error("no room provided, mooooo!");
             return;
         }
-        
-        console.log("Changing " + ROOMS[room] + " to " + topic);
-        
+
         var hipchat = {
                 format: 'json',
                 auth_token: process.env.HUBOT_HIPCHAT_TOKEN,
@@ -267,13 +265,10 @@ module.exports = function(robot) {
                 topic: topic
             },
             params = querystring.stringify(hipchat);
-        console.log("Posting " + params);
 
         this.http("https://api.hipchat.com/v1/rooms/topic")
             .header("Content-Type", "application/x-www-form-urlencoded")
-            .post(params, function(err, res, body) {
-                console.log("POST FINISHED");
-            });
+            .post(params, function(err, res, body) {});
     };
 
     /**

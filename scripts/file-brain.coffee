@@ -10,7 +10,13 @@
 fs = require 'fs'
 
 module.exports = (robot) ->
-  brainFile = __dirname + '/../brain-dump.json' || '/home/ubuntu/culture-cow/brain-dump.json'
+  HOME_PATH = '/home/ubuntu/culture-cow/brain-dump.json'
+  try
+    # throws an error if the file doesn't exist; we don't care about the result
+    _ = fs.lstat(HOME_PATH)
+    brainFile = HOME_PATH
+  catch error
+    brainFile = __dirname + '/../brain-dump.json'
 
   robot.brain.setAutoSave false
 
