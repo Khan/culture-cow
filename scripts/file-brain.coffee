@@ -8,9 +8,11 @@
 #   sam
 
 fs = require 'fs'
+path = require 'path'
 
 module.exports = (robot) ->
-  brainFile = '/home/ubuntu/culture-cow/brain-dump.json'
+  brainPath = process.env.FILE_BRAIN_PATH or '/var/hubot'
+  brainFile = path.join brainPath, 'brain-dump.json'
 
   robot.brain.setAutoSave false
 

@@ -17,3 +17,5 @@ bin/secrets
 data
 
 npm-debug.log
+.idea
+*.iml

@@ -25,6 +25,7 @@
     "hubot-hipchat": "*",
     "hubot-scripts": ">= 2.5.0 < 3.0.0",
     "node-trello": "*",
+    "q": "^1.4.1",
     "shellwords": "0.0.1",
     "underscore": "^1.8.3",
     "wolfram-node": "0.0.1"

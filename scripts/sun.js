@@ -3,10 +3,12 @@
  *   Send prod-deploy commands to jenkins.
  *
  * Dependencies:
- *   None
+ *   ./deploy-queue.js
  *
  * Configuration:
- *   None
+ *   The JENKINS_DEPLOY_TOKEN environment variables must be set.
+ *   The HUBOT_DEBUG flag can be set if you want to debug this
+ *   module without risking talking to Jenkins.
  *
  * Commands:
  *   sun, deploy <branch foo> - deploy a particular branch to production
@@ -20,9 +22,20 @@
  *   csilvers
  */
 
-var http = require('http'),
-    querystring = require("querystring");
+var http        = require('http'),
+    querystring = require("querystring"),
+    queue       = require ("./deploy-queue.js");
 
+
+// The room to listen to deployment commands in. For safety reasons,
+// culture cow will only listen in this room by default.
+const DEPLOYMENT_ROOM = "hackathon";
+
+// Whether to run in DEBUG mode.  In DEBUG mode, culture cow will not
+// actually post commands to Jenkins, nor will it only honor Jenkins
+// state commands that come from the actual Jenkins, allowing for
+// easier debugging
+const DEBUG = !!process.env.HUBOT_DEBUG;
 
 // This is a list of currently allowed deploy commands and the
 // post-data to send to jenkins to have it do that command.  (The
@@ -57,7 +70,7 @@ var onHttpError = function(res) {
         msg: ("(sadpanda) Jenkins won't listen to me.  " +
               "Go talk to it yourself."),
         color: "red",
-        room: "1s0s_deploys",
+        room: DEPLOYMENT_ROOM,
         from: "Sun Wukong",
         message_format: "text"
     };
@@ -100,6 +113,7 @@ var wrongPipelineStep = function(robot, msg, badStep) {
 
 // postData is a url-encoded string, suitable for sending in the http body.
 var runOnJenkins = function(robot, msg, postData, hipchatMessage) {
+
     var options = {
         hostname: 'jenkins.khanacademy.org',
         port: 80,
@@ -117,11 +131,16 @@ var runOnJenkins = function(robot, msg, postData, hipchatMessage) {
 
     // Tell hipchat readers what we're doing.
     robot.fancyMessage({
-        msg: hipchatMessage,
+        msg: (DEBUG ? "DEBUG :: " : "") + hipchatMessage,
         color: "purple",
         room: msg.envelope.room,
         from: "Sun Wukong",
     });
+
+    if (DEBUG) {
+        console.log(options);
+        return;
+    }
 
     var req = http.request(options, function(res) {
         if (res.statusCode !== 200) { onHttpError(res); }
@@ -169,6 +188,8 @@ var handleDeploy = function(robot, msg) {
     };
     var postData = querystring.stringify(postDataMap);
 
+    queue.startDeploy(caller);
+
     runOnJenkins(robot, msg, postData,
                  "Telling Jenkins to deploy branch " + deployBranch + ".");
 };
@@ -215,6 +236,7 @@ var handleFinish = function(robot, msg) {
     }
     runOnJenkins(robot, msg, gNextPipelineCommands.finish,
                  "Telling Jenkins to finish this deploy!");
+    queue.markSuccess(msg.envelope.user.mention_name);
 };
 
 var handleRollback = function(robot, msg) {
@@ -234,6 +256,10 @@ var handleEmergencyRollback = function(robot, msg) {
     runOnJenkins(robot, msg, 'job=' + querystring.escape(jobname),
                  "Telling Jenkins to roll back the live site to a safe " +
                  "version");
+};
+
+var handleAdd = function(robot, msg) {
+    queue.enqueue(msg.envelope.user.mention_name);
 };
 
 
@@ -264,6 +290,8 @@ var handleAfterMonitoring = function(robot, msg) {
 };
 
 var handleDeployDone = function(robot, msg) {
+    queue.deployed();
+
     // The old deploy is over, time to start a new one!
    setNextPipelineCommands({"deploy": true});
 };
@@ -272,14 +300,14 @@ var handleDeployDone = function(robot, msg) {
 // fn takes a robot object and a hubot message object.
 var hearInDeployRoom = function(robot, regexp, fn) {
     robot.hear(regexp, function(msg) {
-        if (msg.envelope.room !== "1s0s_deploys") {
+        if (!DEBUG && msg.envelope.room !== DEPLOYMENT_ROOM) {
             wrongRoom(robot, msg);
             return;
         }
+
         fn(robot, msg);
     });
 };
-
 
 module.exports = function(robot) {
     hearInDeployRoom(robot, /^sun,\s+ping$/i, handlePing);
@@ -293,6 +321,7 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /^sun,\s+rollback.*$/i, handleRollback);
     hearInDeployRoom(robot, /^sun,\s+emergency rollback.*$/i,
                      handleEmergencyRollback);
+    hearInDeployRoom(robot, /^sun,\s+add\s+me.*/i, handleAdd);
 
     // These are the Jenkins-emitted hipchat messages we listen for.
     hearInDeployRoom(robot, /\(failed\) abort: http:\/\/jenkins.khanacademy.org(.*\/stop)$/, handleAfterStart);
@@ -301,4 +330,18 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /\(successful\) finish up: type 'sun, finish up' or visit http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort and roll back: type 'sun, abort' or visit http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterMonitoring);
     hearInDeployRoom(robot, /Deploy of .* (failed[:.]|succeeded!)/, handleDeployDone);
     hearInDeployRoom(robot, /has manually released the deploy lock/, handleDeployDone);
+
+    queue.addNotificationCallback(function(user, message, severity) {
+        var s = (user ? "@" + user + ": " : "") + message;
+        robot.fancyMessage({
+            msg: s,
+            color: severity === queue.severity.HIGH ? "red" : "green",
+            room: DEPLOYMENT_ROOM,
+            from: "Sun Wukong",
+        });
+    });
+    queue.addSubjectCallback(function(s) {
+        robot.setTopic(DEPLOYMENT_ROOM, s);
+    });
+    queue.activate(robot);
 };
