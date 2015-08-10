@@ -68,16 +68,7 @@ var queue = {
     startDeploy: function startDeploy(user) {
         queue.getDeploymentState()
             .then(function(state) {
-                var cardId = null;
-                for (var card of state.queue) {
-                    var components = card.name.split("+");
-                    for (var name of components) {
-                        if (name === user) {
-                            cardId = card.id;
-                            break;
-                        }
-                    }
-                }
+                var cardId = queue._findCardForOwner(state.queue, user);
                 if (cardId !== null) {
                     _commentOnCard(queue.trello, cardId, "Beginning deploy!").done();
                     _moveCard(queue.trello, cardId, queue._columnIds.runningId).done();
@@ -93,16 +84,7 @@ var queue = {
     markSuccess: function markSuccess(user) {
         queue.getDeploymentState()
             .then(function(state) {
-                var cardId = null;
-                for (var card of state.running) {
-                    var components = card.name.split("+");
-                    for (var name of components) {
-                        if (name === user) {
-                            cardId = card.id;
-                            break;
-                        }
-                    }
-                }
+                var cardId = queue._findCardForOwner(state.running, user);
                 if (cardId !== null) {
                     _commentOnCard(queue.trello, cardId, "Deploy succeeded!").done();
                     _moveCard(queue.trello, cardId, queue._columnIds.doneId).done();
@@ -115,16 +97,7 @@ var queue = {
     markFailure: function markFailure(user) {
         queue.getDeploymentState()
             .then(function(state) {
-                var cardId = null;
-                for (var card of state.running) {
-                    var components = card.name.split("+");
-                    for (var name of components) {
-                        if (name === user) {
-                            cardId = card.id;
-                            break;
-                        }
-                    }
-                }
+                var cardId = queue._findCardForOwner(state.running, user);
                 if (cardId !== null) {
                     _commentOnCard(queue.trello, cardId, "Deploy failed!").done();
                     _moveCard(queue.trello, cardId, queue._columnIds.queueId, "top").done();
@@ -223,9 +196,9 @@ var queue = {
     // flexibility, this function doesn't directly send anything; instead, it
     // relies on at least one module having registered a callback.
     _notify: function _notify(user, message, severity) {
-        for (var callback of queue._notifierCallbacks) {
+        queue._notifierCallbacks.forEach(function(callback) {
             callback(user, message, severity);
-        }
+        });
     },
 
     // Updates the subject to reflect the current state of the
@@ -246,9 +219,25 @@ var queue = {
     // on at least one subject change handler having been registered by
     // addSubjectCallback.
     _setSubject: function _setSubject(subject) {
-        for (var callback of queue._setSubjectCallbacks) {
+        queue._setSubjectCallbacks.forEach(function(callback) {
             callback(subject);
-        }
+        });
+    },
+
+    // Finds the first card that includes a given user. A card is considered
+    // to have the format name[+name[+name[...]]]. An array will always be
+    // returned, even if only one user is listed.
+    _findCardForOwner: function _findCardForOwner(list, user) {
+        var cardId = null;
+        list.forEach(function(card) {
+            var components = card.name.split("+");
+            components.forEach(function(name) {
+                if (cardId !== null && name === user) {
+                    cardId = card.id;
+                }
+            });
+        });
+        return cardId;
     },
 
     // Trello list IDs for the three lists we care about
@@ -342,12 +331,12 @@ function _getLists(trello, board) {
 function _getListIds(lists, desiredNames) {
     var ids = [];
     var idMap = {};
-    for (var list of lists) {
+    lists.forEach(function(list) {
         idMap[list.name] = list.id;
-    }
-    for (var name of desiredNames) {
+    });
+    desiredNames.forEach(function(name) {
         ids.push(idMap[name]);
-    }
+    });
     return ids;
 }
 
