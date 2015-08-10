@@ -24,7 +24,7 @@
 
 var http        = require('http'),
     querystring = require("querystring"),
-    queue       = require ("./deploy-queue.js");
+    queue       = require ("../libs/deploy-queue.js");
 
 
 // The room to listen to deployment commands in. For safety reasons,
