@@ -29,7 +29,7 @@ var http        = require('http'),
 
 // The room to listen to deployment commands in. For safety reasons,
 // culture cow will only listen in this room by default.
-const DEPLOYMENT_ROOM = "hackathon";
+const DEPLOYMENT_ROOM = process.env.DEPLOY_ROOM || "hackathon";
 
 // Whether to run in DEBUG mode.  In DEBUG mode, culture cow will not
 // actually post commands to Jenkins, nor will it only honor Jenkins
