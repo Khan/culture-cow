@@ -205,19 +205,8 @@ var handleSetDefault = function(robot, msg) {
 
 var handleAbort = function(robot, msg) {
     if (gNextPipelineCommands.cancel) {
-        // Jenkins has two different ways to abort: cancel (if we're
-        // in the middle of running a job) or abort (if we're between
-        // jobs).  Cancel uses a GET, not a POST, so we can't use
-        // runOnJenkins().
-        robot.fancyMessage({
-            msg: "Telling Jenkins to cancel this deploy.",
-            color: "purple",
-            room: msg.envelope.room,
-            from: "Sun Wukong",
-        });
-        http.get({host: "jenkins.khanacademy.org",
-                  path: gNextPipelineCommands.cancel},
-                 function(res) { onHttpError(res); });
+        runOnJenkins(robot, msg, gNextPipelineCommands.cancel,
+            "Telling Jenkins to cancel this deploy");
         return;
     }
 
