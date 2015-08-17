@@ -61,7 +61,7 @@ var setNextPipelineCommands = function(newData) {
 };
 
 
-var onHttpError = function(res) {
+var onHttpError = function(robot, res) {
     var errorMessage = {
         msg: ("(sadpanda) Jenkins won't listen to me.  " +
               "Go talk to it yourself."),
@@ -139,7 +139,7 @@ var runOnJenkins = function(robot, msg, postData, hipchatMessage) {
     }
 
     var req = http.request(options, function(res) {
-        if (res.statusCode !== 200) { onHttpError(res); }
+        if (res.statusCode !== 200) { onHttpError(robot, res); }
     });
 
     // write data to request body
