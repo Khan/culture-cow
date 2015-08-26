@@ -2,9 +2,6 @@
  * Description:
  *   Send prod-deploy commands to jenkins.
  *
- * Dependencies:
- *   ./deploy-queue.js
- *
  * Configuration:
  *   The JENKINS_DEPLOY_TOKEN environment variables must be set.
  *   The HUBOT_DEBUG flag can be set if you want to debug this
@@ -23,8 +20,7 @@
  */
 
 var http        = require('http'),
-    querystring = require("querystring"),
-    queue       = require ("../libs/deploy-queue.js");
+    querystring = require("querystring");
 
 
 // The room to listen to deployment commands in. For safety reasons,
@@ -188,8 +184,6 @@ var handleDeploy = function(robot, msg) {
     };
     var postData = querystring.stringify(postDataMap);
 
-    queue.startDeploy(caller);
-
     runOnJenkins(robot, msg, postData,
                  "Telling Jenkins to deploy branch " + deployBranch + ".");
 };
@@ -225,7 +219,6 @@ var handleFinish = function(robot, msg) {
     }
     runOnJenkins(robot, msg, gNextPipelineCommands.finish,
                  "Telling Jenkins to finish this deploy!");
-    queue.markSuccess(msg.envelope.user.mention_name);
 };
 
 var handleRollback = function(robot, msg) {
@@ -245,10 +238,6 @@ var handleEmergencyRollback = function(robot, msg) {
     runOnJenkins(robot, msg, 'job=' + querystring.escape(jobname),
                  "Telling Jenkins to roll back the live site to a safe " +
                  "version");
-};
-
-var handleAdd = function(robot, msg) {
-    queue.enqueue(msg.envelope.user.mention_name);
 };
 
 
@@ -279,8 +268,6 @@ var handleAfterMonitoring = function(robot, msg) {
 };
 
 var handleDeployDone = function(robot, msg) {
-    queue.deployed();
-
     // The old deploy is over, time to start a new one!
    setNextPipelineCommands({"deploy": true});
 };
@@ -319,18 +306,4 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /\(successful\) finish up: type 'sun, finish up' or visit http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?([^\n]*)\n\(failed\) abort and roll back: type 'sun, abort' or visit http:\/\/jenkins.khanacademy.org\/job\/([^\/]*)\/parambuild\?(.*)/, handleAfterMonitoring);
     hearInDeployRoom(robot, /Deploy of .* (failed[:.]|succeeded!)/, handleDeployDone);
     hearInDeployRoom(robot, /has manually released the deploy lock/, handleDeployDone);
-
-    queue.addNotificationCallback(function(user, message, severity) {
-        var s = (user ? "@" + user + ": " : "") + message;
-        robot.fancyMessage({
-            msg: s,
-            color: severity === queue.severity.HIGH ? "red" : "green",
-            room: DEPLOYMENT_ROOM,
-            from: "Sun Wukong",
-        });
-    });
-    queue.addSubjectCallback(function(s) {
-        robot.setTopic(DEPLOYMENT_ROOM, s);
-    });
-    queue.activate(robot);
 };
