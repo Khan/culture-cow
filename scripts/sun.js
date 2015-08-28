@@ -304,7 +304,6 @@ module.exports = function(robot) {
     hearInDeployRoom(robot, /^sun,\s+rollback.*$/i, handleRollback);
     hearInDeployRoom(robot, /^sun,\s+emergency rollback.*$/i,
                      handleEmergencyRollback);
-    hearInDeployRoom(robot, /^sun,\s+add\s+me.*/i, handleAdd);
 
     // These are the Jenkins-emitted hipchat messages we listen for.
     hearInDeployRoom(robot, /\(failed\) abort: https:\/\/jenkins.khanacademy.org(.*\/stop)$/, handleAfterStart);
