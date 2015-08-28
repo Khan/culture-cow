@@ -139,7 +139,10 @@ var runOnJenkins = function(robot, msg, postData, hipchatMessage) {
     }
 
     var req = https.request(options, function(res) {
-        if (res.statusCode !== 200) { onHttpError(robot, res); }
+        // Jenkins apparently now sometimes returns 201s for success, so allow
+        // that.  We don't want to allow 3xx because that means that whatever
+        // we were trying to do wasn't done.
+        if (res.statusCode > 299) { onHttpError(robot, res); }
     });
 
     // write data to request body
