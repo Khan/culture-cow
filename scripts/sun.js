@@ -316,7 +316,7 @@ var handleSetDefault = function(robot, deployState, msg) {
 
 var handleAbort = function(robot, deployState, msg) {
     _getRunningJob().then(function(runningJob) {
-        if (runningJob.jobName) {
+        if (runningJob) {
             // There's a job running, so we should probably cancel it.
             if (runningJob.jobName === 'deploy-finish') {
                 // We shouldn't cancel a deploy-finish.  If we need to roll
